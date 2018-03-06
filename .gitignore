@@ -1,0 +1,4 @@
+node_modules/
+/Gulpfile.js
+/*.spec.js
+/yarn-error.log
