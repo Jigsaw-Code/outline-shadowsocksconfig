@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "declaration": false,
+    "sourceMap": false,
+    "inlineSourceMap": false,
+    "pretty": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "removeComments": false,
+    "strictNullChecks": true,
+    "lib": [
+      "dom",
+      "es5",
+      "es2015.promise",
+      "es2015.iterable",
+      "es2015.collection",
+      "es2016",
+      "scripthost"
+    ]
+  },
+  "include": [
+    "*.d.ts"
+  ],
+  "exclude": [
+    "Gulpfile.ts"
+  ],
+  "compileOnSave": false
+}
