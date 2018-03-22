@@ -120,6 +120,7 @@ export const METHODS = new Set([
   'salsa20',
   'chacha20',
   'chacha20-ietf',
+  'xchacha20-ietf-poly1305',
 ]);
 
 export class Method extends ValidatedConfigField {

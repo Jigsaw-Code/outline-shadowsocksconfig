@@ -43,7 +43,7 @@ gulp.task('build:lib', () => {
     .pipe(plugins.sourcemaps.init())
     .pipe(tsProject())
     .once('error', function () {
-      this.once('finish', () => process.exit(1))
+      this.once('finish', () => process.exit(1));
     })
     .pipe(plugins.replace(
       'Object.defineProperty(exports, "__esModule", { value: true });',
@@ -68,7 +68,7 @@ gulp.task('build:tests', () => {
     ])
     .pipe(tsProject())
     .once('error', function () {
-      this.once('finish', () => process.exit(1))
+      this.once('finish', () => process.exit(1));
     })
     .js
     .pipe(gulp.dest('.'));
