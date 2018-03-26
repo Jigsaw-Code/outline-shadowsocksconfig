@@ -199,7 +199,7 @@ export const SHADOWSOCKS_URI = {
 
   validateProtocol: (uri: string) => {
     if (!uri.startsWith(SHADOWSOCKS_URI.PROTOCOL)) {
-      throw new InvalidUri(`URI must start with "${SHADOWSOCKS_URI.PROTOCOL}": ${uri}`);
+      throw new InvalidUri(`URI must start with "${SHADOWSOCKS_URI.PROTOCOL}"`);
     }
   },
 
@@ -216,7 +216,7 @@ export const SHADOWSOCKS_URI = {
       const originalErrorName = error!.name! || '(Unnamed Error)';
       const originalErrorMessage = error!.message! || '(no error message provided)';
       const originalErrorString = `${originalErrorName}: ${originalErrorMessage}`;
-      const newErrorMessage = `Invalid input: ${uri} - Original error: ${originalErrorString}`;
+      const newErrorMessage = `Invalid input: ${originalErrorString}`;
       error = new InvalidUri(newErrorMessage);
     }
     throw error;
@@ -236,12 +236,12 @@ export const LEGACY_BASE64_URI = {
     const b64DecodedData = b64Decode(b64EncodedData);
     const atSignIndex = b64DecodedData.indexOf('@');
     if (atSignIndex === -1) {
-      throw new InvalidUri(`Missing "@": ${b64DecodedData}`);
+      throw new InvalidUri(`Missing "@"`);
     }
     const methodAndPassword = b64DecodedData.substring(0, atSignIndex);
     const methodEndIndex = methodAndPassword.indexOf(':');
     if (methodEndIndex === -1) {
-      throw new InvalidUri(`Missing password part: ${methodAndPassword}`);
+      throw new InvalidUri(`Missing password`);
     }
     const methodString = methodAndPassword.substring(0, methodEndIndex);
     const method = new Method(methodString);
@@ -252,7 +252,7 @@ export const LEGACY_BASE64_URI = {
     const hostAndPort = b64DecodedData.substring(hostStartIndex);
     const hostEndIndex = hostAndPort.lastIndexOf(':');
     if (hostEndIndex === -1) {
-      throw new InvalidUri(`Missing port part: ${hostAndPort}`);
+      throw new InvalidUri(`Missing port`);
     }
     const uriFormattedHost = hostAndPort.substring(0, hostEndIndex);
     let host: Host;
@@ -305,7 +305,7 @@ export const SIP002_URI = {
     const b64DecodedUserInfo = b64Decode(b64EncodedUserInfo);
     const colonIdx = b64DecodedUserInfo.indexOf(':');
     if (colonIdx === -1) {
-      throw new InvalidUri(`Missing password part: ${b64DecodedUserInfo}`);
+      throw new InvalidUri(`Missing password`);
     }
     const methodString = b64DecodedUserInfo.substring(0, colonIdx);
     const method = new Method(methodString);
