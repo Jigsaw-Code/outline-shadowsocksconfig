@@ -288,7 +288,7 @@ export const SIP002_URI = {
   parse: (uri: string): Config => {
     SHADOWSOCKS_URI.validateProtocol(uri);
     // Can use built-in URL parser for expedience. Just have to replace "ss" with "http" to ensure
-    // correct results.
+    // correct results, otherwise browsers like Safari fail to parse it.
     const inputForUrlParser = `http${uri.substring(2)}`;
     // The built-in URL parser throws as desired when given URIs with invalid syntax.
     const urlParserResult = new URL(inputForUrlParser);
@@ -298,7 +298,13 @@ export const SIP002_URI = {
     const brackets = uriFormattedHost[0] === '[' && uriFormattedHost[last] === ']';
     const hostString = brackets ? uriFormattedHost.substring(1, last) : uriFormattedHost;
     const host = new Host(hostString);
-    const port = new Port(urlParserResult.port);
+    let parsedPort = urlParserResult.port;
+    if (!parsedPort && uri.match(/:80($|\/)/g)) {
+      // The default URL parser fails to recognize the default port (80) when the URI being parsed
+      // is HTTP. Check if the port is present at the end of the string or before the parameters.
+      parsedPort = 80;
+    }
+    const port = new Port(parsedPort);
     const tag = new Tag(decodeURIComponent(urlParserResult.hash.substring(1)));
     const b64EncodedUserInfo = urlParserResult.username.replace(/%3D/g, '=');
     // base64.decode throws as desired when given invalid base64 input.
