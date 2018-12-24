@@ -261,7 +261,7 @@ platformExportObj.LEGACY_BASE64_URI = {
         var tag = new Tag(decodeURIComponent(uri.substring(tagStartIndex)));
         var b64EncodedData = uri.substring('ss://'.length, b64EndIndex);
         var b64DecodedData = b64Decode(b64EncodedData);
-        var atSignIndex = b64DecodedData.indexOf('@');
+        var atSignIndex = b64DecodedData.lastIndexOf('@');
         if (atSignIndex === -1) {
             throw new InvalidUri("Missing \"@\"");
         }
