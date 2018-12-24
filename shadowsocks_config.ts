@@ -234,7 +234,7 @@ export const LEGACY_BASE64_URI = {
     const tag = new Tag(decodeURIComponent(uri.substring(tagStartIndex)));
     const b64EncodedData = uri.substring('ss://'.length, b64EndIndex);
     const b64DecodedData = b64Decode(b64EncodedData);
-    const atSignIndex = b64DecodedData.indexOf('@');
+    const atSignIndex = b64DecodedData.lastIndexOf('@');
     if (atSignIndex === -1) {
       throw new InvalidUri(`Missing "@"`);
     }
