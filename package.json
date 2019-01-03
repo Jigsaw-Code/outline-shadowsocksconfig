@@ -8,6 +8,9 @@
     "precommit": "tslint -p . --fix; git-clang-format --extensions ts",
     "clean": "rm -rf node_modules/ Gulpfile.js *.spec.js"
   },
+  "__COMMENTS__": [
+    "natives@1.1.6 for Gulp 3.x on Node 10.x: https://github.com/gulpjs/gulp/issues/2162#issuecomment-385197164"
+  ],
   "devDependencies": {
     "@types/base-64": "^0.1.2",
     "@types/gulp": "^4.0.4",
@@ -32,5 +35,8 @@
   "dependencies": {
     "base-64": "^0.1.0",
     "punycode": "^1.4.1"
+  },
+  "resolutions": {
+    "natives": "1.1.6"
   }
 }
