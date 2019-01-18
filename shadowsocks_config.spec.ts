@@ -254,6 +254,13 @@ describe('shadowsocks_config', () => {
       expect(config.extra.foo!).toEqual('1');
     });
 
+    it('can parse a valid SIP002 URI with the at symbol and other symbols in the password', () => {
+      const input =
+          'ss://YmYtY2ZiOnRlc3QvIUAjOi5fLV4nIiRAJUAxOTIuMTY4LjEwMC4xOjg4ODg#server_by_tim@shadowsocks.org';
+      const config = SHADOWSOCKS_URI.parse(input);
+      expect(config.password.data).toEqual('test/!@#:._-^\'"$@%');
+    });
+
     it('can parse a valid SIP002 URI with a plugin param', () => {
       const input = 'ss://cmM0LW1kNTpwYXNzd2Q=@192.168.100.1:8888/?plugin=obfs-local%3Bobfs%3Dhttp';
       const config = SHADOWSOCKS_URI.parse(input);
