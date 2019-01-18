@@ -55,8 +55,8 @@ yarn run gulp
 yarn run test
 ```
 
-### TypeScript Linting
+### Linting (tslint and commit formatting)
 
 ```
-yarn run gulp tslint
+yarn run precommit
 ```
