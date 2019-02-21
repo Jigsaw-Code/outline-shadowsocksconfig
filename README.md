@@ -42,11 +42,10 @@ for example usage.
 
 First [install yarn](https://yarnpkg.com/en/docs/install-ci).
 
-The Gulpfile itself is written in TypeScript.
-You can run the package script `gulp` to compile and run it on the fly:
+Then, build with the included script:
 
 ```
-yarn run gulp
+yarn run build
 ```
 
 ### Unit Tests
