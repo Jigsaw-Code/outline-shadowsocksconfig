@@ -6,69 +6,13 @@
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/@types/base-64/-/base-64-0.1.2.tgz#63ac318302cdabb5f04e8ae2a56e54d4832107e2"
 
-"@types/chokidar@*":
-  version "1.7.3"
-  resolved "https://registry.yarnpkg.com/@types/chokidar/-/chokidar-1.7.3.tgz#ca87a53aa596c01eb93237ab4055edf71dcb9ca6"
-  dependencies:
-    "@types/node" "*"
-
-"@types/glob-stream@*":
-  version "3.1.31"
-  resolved "https://registry.yarnpkg.com/@types/glob-stream/-/glob-stream-3.1.31.tgz#015842260c01dab3b56578d8b37de2e57483d4ad"
-  dependencies:
-    "@types/glob" "*"
-    "@types/node" "*"
-
-"@types/glob@*":
-  version "5.0.33"
-  resolved "https://registry.yarnpkg.com/@types/glob/-/glob-5.0.33.tgz#3dff7c6ce09d65abe919c7961dc3dee016f36ad7"
-  dependencies:
-    "@types/minimatch" "*"
-    "@types/node" "*"
-
-"@types/gulp@^4.0.4":
-  version "4.0.4"
-  resolved "https://registry.yarnpkg.com/@types/gulp/-/gulp-4.0.4.tgz#753ffe5b0ddaf0c9a60101b346141bb80e602f25"
-  dependencies:
-    "@types/chokidar" "*"
-    "@types/undertaker" "*"
-    "@types/vinyl-fs" "*"
-
 "@types/jasmine@^2.8.6":
   version "2.8.6"
   resolved "https://registry.yarnpkg.com/@types/jasmine/-/jasmine-2.8.6.tgz#14445b6a1613cf4e05dd61c3c3256d0e95c0421e"
 
-"@types/minimatch@*":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-3.0.1.tgz#b683eb60be358304ef146f5775db4c0e3696a550"
-
-"@types/node@*", "@types/node@^8.0.41":
+"@types/node@^8.0.41":
   version "8.0.45"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.45.tgz#89fad82439d5624e1b5c6b42f0f5d85136dcdecc"
-
-"@types/undertaker-registry@*":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@types/undertaker-registry/-/undertaker-registry-1.0.0.tgz#6f61a0be75a22e9ef62df68b480c68bce344fe5f"
-
-"@types/undertaker@*":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@types/undertaker/-/undertaker-1.1.2.tgz#cf0f62cdcbdf62ad9f70a4d78f81869a5c349a09"
-  dependencies:
-    "@types/undertaker-registry" "*"
-
-"@types/vinyl-fs@*":
-  version "2.4.7"
-  resolved "https://registry.yarnpkg.com/@types/vinyl-fs/-/vinyl-fs-2.4.7.tgz#9165d331758b351641debcfe656a133597bacb2f"
-  dependencies:
-    "@types/glob-stream" "*"
-    "@types/node" "*"
-    "@types/vinyl" "*"
-
-"@types/vinyl@*":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@types/vinyl/-/vinyl-2.0.1.tgz#6b414dfdcd4a785e8e76e87565ed29e79490d9b7"
-  dependencies:
-    "@types/node" "*"
 
 ansi-regex@^2.0.0:
   version "2.1.1"

@@ -11,7 +11,6 @@
   "types": "./build/shadowsocks_config.d.ts",
   "devDependencies": {
     "@types/base-64": "^0.1.2",
-    "@types/gulp": "^4.0.4",
     "@types/jasmine": "^2.8.6",
     "@types/node": "^8.0.41",
     "clang-format": "^1.2.2",
