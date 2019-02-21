@@ -3,32 +3,19 @@
   "version": "0.0.8",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "tsc -t ES6 -m commonjs Gulpfile.ts && gulp",
+    "build": "tsc",
     "test": "yarn build && jasmine --config=jasmine.json",
     "precommit": "tslint -p . --fix; git-clang-format --extensions ts",
-    "clean": "rm -rf node_modules/ Gulpfile.js *.spec.js"
+    "clean": "rm -rf node_modules/ *.spec.js"
   },
-  "__COMMENTS__": [
-    "natives@1.1.6 for Gulp 3.x on Node 10.x: https://github.com/gulpjs/gulp/issues/2162#issuecomment-385197164"
-  ],
   "devDependencies": {
     "@types/base-64": "^0.1.2",
     "@types/gulp": "^4.0.4",
     "@types/jasmine": "^2.8.6",
     "@types/node": "^8.0.41",
     "clang-format": "^1.2.2",
-    "gulp": "^3.9.1",
-    "gulp-cli": "^1.4.0",
-    "gulp-debug": "^3.1.0",
-    "gulp-insert": "^0.5.0",
-    "gulp-load-plugins": "^1.5.0",
-    "gulp-replace": "^0.6.1",
-    "gulp-sourcemaps": "^2.6.1",
-    "gulp-typescript": "^3.2.2",
-    "gulp-util": "^3.0.8",
     "husky": "^0.14.3",
     "jasmine": "^3.1.0",
-    "run-sequence": "^2.2.0",
     "tslib": "^1.8.0",
     "tslint": "^5.12.1",
     "typescript": "^2.5.3"
@@ -36,8 +23,5 @@
   "dependencies": {
     "base-64": "^0.1.0",
     "punycode": "^1.4.1"
-  },
-  "resolutions": {
-    "natives": "1.1.6"
   }
 }
