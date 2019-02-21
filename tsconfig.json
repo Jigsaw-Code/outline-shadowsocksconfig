@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     "target": "es5",
+    "outDir": "build",
+    "declaration": true,
     "removeComments": false,
     "strict": true,
     "module": "commonjs",
@@ -12,6 +14,6 @@
     ]
   },
   "include": [
-    "shadowsocks_config*.ts"
+    "src/**/*.ts"
   ]
 }
