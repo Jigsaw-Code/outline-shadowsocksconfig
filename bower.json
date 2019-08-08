@@ -1,9 +1,0 @@
-{
-  "name": "shadowsocks-config",
-  "version": "0.0.8",
-  "license": "Apache-2.0",
-  "main": "shadowsocks_config.js",
-  "dependencies": {
-    "punycode": "^1.4.1"
-  }
-}

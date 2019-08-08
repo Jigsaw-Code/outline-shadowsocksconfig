@@ -1,3 +1,4 @@
-node_modules/
-/build/*.spec.*
 /yarn-error.log
+dist
+bazel-out
+node_modules

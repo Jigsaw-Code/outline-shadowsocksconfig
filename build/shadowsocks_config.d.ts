@@ -1,3 +1,4 @@
+/// <amd-module name="outline_shadowsocksconfig/src/shadowsocks_config" />
 export declare class ShadowsocksConfigError extends Error {
     constructor(message: string);
 }

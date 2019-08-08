@@ -1,4 +1,5 @@
-# Copyright 2018 The Outline Authors
+#!/bin/bash
+# Copyright 2019 The Outline Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,23 +13,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-dist: trusty
-
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - wget
-      - pkg-config
-
-cache:
-  yarn: true
-
-before_install:
-  - wget https://github.com/bazelbuild/bazel/releases/download/0.28.1/bazel_0.28.1-linux-x86_64.deb
-  - sha256sum -c tools/bazel_0.28.1-linux-x86_64.deb.sha256
-  - sudo dpkg -i bazel_0.28.1-linux-x86_64.deb
-
-script:
-  - bazel test //src/...
+bazel build src/...
+cp dist/bin/src/shadowsocks_config.{d.ts,js} build/
