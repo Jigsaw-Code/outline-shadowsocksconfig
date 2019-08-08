@@ -6,8 +6,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "build": "bazel build //...",
-    "test": "bazel test //...",
-    "clean": "bazel clean --expunge"
+    "test": "bazel test //..."
   },
   "main": "./build/shadowsocks_config.js",
   "types": "./build/shadowsocks_config.d.ts",
