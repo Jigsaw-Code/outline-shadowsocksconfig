@@ -13,5 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-bazel build src/...
-cp dist/bin/src/shadowsocks_config.{d.ts,js} build/
+bazel build :shadowsocks_config_npm
+
+rm -rf build
+mkdir -p build
+cp -r dist/bin/shadowsocks_config_npm/src/* build/

@@ -15,6 +15,8 @@
 # Add rules here to build your software
 # See https://docs.bazel.build/versions/master/build-ref.html#BUILD_files
 
+load("@build_bazel_rules_nodejs//:defs.bzl", "npm_package")
+
 # Allow any ts_library rules in this workspace to reference the config
 # Note: if you move the tsconfig.json file to a subdirectory, you can add an alias() here instead
 #   so that ts_library rules still use it by default.
@@ -22,4 +24,10 @@
 exports_files(
     ["tsconfig.json"],
     visibility = ["//:__subpackages__"],
+)
+
+npm_package(
+    name = "shadowsocks_config_npm",
+    srcs = [":package.json"],
+    deps = ["//src:shadowsocks_config"],
 )
