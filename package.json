@@ -1,27 +1,34 @@
 {
-  "name": "outline-shadowsocksconfig",
-  "version": "0.0.8",
+  "name": "outline_shadowsocksconfig",
+  "author": "The Outline Team",
+  "version": "0.1.0",
+  "private": true,
   "license": "Apache-2.0",
   "scripts": {
-    "build": "tsc",
-    "test": "yarn build && jasmine --config=jasmine.json",
-    "clean": "rm -rf build/*.spec.* node_modules/"
+    "build": "bazel build //...",
+    "test": "bazel test //..."
   },
   "main": "./build/shadowsocks_config.js",
   "types": "./build/shadowsocks_config.d.ts",
   "devDependencies": {
+    "@bazel/bazel": "latest",
+    "@bazel/buildifier": "latest",
+    "@bazel/ibazel": "latest",
+    "@bazel/jasmine": "^0.35.0",
+    "@bazel/typescript": "latest",
     "@types/base-64": "^0.1.2",
     "@types/jasmine": "^2.8.6",
     "@types/node": "^8.0.41",
+    "@types/punycode": "^2.1.0",
     "clang-format": "^1.2.2",
     "husky": "^1.3.1",
     "jasmine": "^3.1.0",
     "tslint": "^5.12.1",
-    "typescript": "^2.5.3"
+    "typescript": "~3.4.0"
   },
   "dependencies": {
     "base-64": "^0.1.0",
-    "punycode": "^1.4.1"
+    "punycode": "^2.1.1"
   },
   "husky": {
     "hooks": {
