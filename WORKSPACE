@@ -27,6 +27,7 @@ workspace(
 # Install the nodejs "bootstrap" package
 # This provides the basic tools for running and packaging nodejs programs in Bazel
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
 http_archive(
     name = "build_bazel_rules_nodejs",
     sha256 = "6625259f9f77ef90d795d20df1d0385d9b3ce63b6619325f702b6358abb4ab33",
@@ -36,6 +37,7 @@ http_archive(
 # The yarn_install rule runs yarn anytime the package.json or yarn.lock file changes.
 # It also extracts and installs any Bazel rules distributed in an npm package.
 load("@build_bazel_rules_nodejs//:defs.bzl", "yarn_install")
+
 yarn_install(
     # Name this npm so that Bazel Label references look like @npm//package
     name = "npm",
@@ -45,8 +47,10 @@ yarn_install(
 
 # Install any Bazel rules which were extracted earlier by the yarn_install rule.
 load("@npm//:install_bazel_dependencies.bzl", "install_bazel_dependencies")
+
 install_bazel_dependencies()
 
-# Setup TypeScript toolchain 
+# Setup TypeScript toolchain
 load("@npm_bazel_typescript//:index.bzl", "ts_setup_workspace")
+
 ts_setup_workspace()

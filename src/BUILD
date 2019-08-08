@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-package(default_visibility=["//visibility:public"])
+package(default_visibility = ["//visibility:public"])
+
 load("@npm_bazel_typescript//:index.bzl", "ts_library")
 load("@npm_bazel_jasmine//:index.bzl", "jasmine_node_test")
 
@@ -21,23 +22,23 @@ ts_library(
     srcs = ["shadowsocks_config.ts"],
     deps = [
         "@npm//@types/node",
-        "@npm//punycode",
         "@npm//base-64",
+        "@npm//punycode",
     ],
 )
 
 ts_library(
     name = "shadowsocks_config_test_lib",
+    testonly = True,
     srcs = ["shadowsocks_config.spec.ts"],
     deps = [
         ":shadowsocks_config",
         "@npm//@types/jasmine",
     ],
-    testonly = True,
 )
 
 jasmine_node_test(
     name = "shadowsocks_config_test",
-    deps = [":shadowsocks_config_test_lib"],
     size = "small",
+    deps = [":shadowsocks_config_test_lib"],
 )
