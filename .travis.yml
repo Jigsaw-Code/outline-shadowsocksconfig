@@ -13,6 +13,7 @@
 # limitations under the License.
 
 dist: trusty
+language: minimal
 
 addons:
   apt:
@@ -32,4 +33,3 @@ before_install:
 
 script:
   - bazel --bazelrc=tools/travis.bazelrc test //src/...
-  
