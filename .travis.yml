@@ -31,4 +31,5 @@ before_install:
   - sudo dpkg -i bazel_0.28.1-linux-x86_64.deb
 
 script:
-  - bazel test //src/...
+  - bazel --bazelrc=tools/travis.bazelrc test //src/...
+  
