@@ -1,6 +1,6 @@
 {
   "name": "outline-shadowsocksconfig",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "license": "Apache-2.0",
   "scripts": {
     "build": "tsc",
@@ -10,7 +10,6 @@
   "main": "./build/shadowsocks_config.js",
   "types": "./build/shadowsocks_config.d.ts",
   "devDependencies": {
-    "@types/base-64": "^0.1.2",
     "@types/jasmine": "^2.8.6",
     "@types/node": "^8.0.41",
     "clang-format": "^1.2.2",
@@ -20,7 +19,7 @@
     "typescript": "^2.5.3"
   },
   "dependencies": {
-    "base-64": "^0.1.0",
+    "js-base64": "^3.5.2",
     "punycode": "^1.4.1"
   },
   "husky": {
