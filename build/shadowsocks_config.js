@@ -23,16 +23,8 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-/* tslint:disable */
-var isBrowser = typeof window !== 'undefined';
-var b64Encode = isBrowser ? btoa : require('base-64').encode;
-var b64Decode = isBrowser ? atob : require('base-64').decode;
-var URL = isBrowser ? window.URL : require('url').URL;
-var punycode = isBrowser ? window.punycode : require('punycode');
-if (!punycode) {
-    throw new Error("Could not find punycode. Did you forget to add e.g.\n  <script src=\"bower_components/punycode/punycode.min.js\"></script>?");
-}
-/* tslint:enable */
+var punycode = require('punycode');
+var js_base64_1 = require('js-base64');
 // Custom error base class
 var ShadowsocksConfigError = /** @class */ (function (_super) {
     __extends(ShadowsocksConfigError, _super);
@@ -252,7 +244,7 @@ exports.LEGACY_BASE64_URI = {
         var tagStartIndex = hasTag ? hashIndex + 1 : uri.length;
         var tag = new Tag(decodeURIComponent(uri.substring(tagStartIndex)));
         var b64EncodedData = uri.substring('ss://'.length, b64EndIndex);
-        var b64DecodedData = b64Decode(b64EncodedData);
+        var b64DecodedData = js_base64_1.Base64.decode(b64EncodedData);
         var atSignIndex = b64DecodedData.lastIndexOf('@');
         if (atSignIndex === -1) {
             throw new InvalidUri("Missing \"@\"");
@@ -292,7 +284,8 @@ exports.LEGACY_BASE64_URI = {
     stringify: function (config) {
         var host = config.host, port = config.port, method = config.method, password = config.password, tag = config.tag;
         var hash = exports.SHADOWSOCKS_URI.getHash(tag);
-        var b64EncodedData = b64Encode(method.data + ":" + password.data + "@" + host.data + ":" + port.data);
+        var b64EncodedData = js_base64_1.Base64.encode(
+            method.data + ':' + password.data + '@' + host.data + ':' + port.data);
         var dataLength = b64EncodedData.length;
         var paddingLength = 0;
         for (; b64EncodedData[dataLength - 1 - paddingLength] === '='; paddingLength++)
@@ -321,13 +314,13 @@ exports.SIP002_URI = {
         if (!parsedPort && uri.match(/:80($|\/)/g)) {
             // The default URL parser fails to recognize the default port (80) when the URI being parsed
             // is HTTP. Check if the port is present at the end of the string or before the parameters.
-            parsedPort = 80;
+            parsedPort = '80';
         }
         var port = new Port(parsedPort);
         var tag = new Tag(decodeURIComponent(urlParserResult.hash.substring(1)));
         var b64EncodedUserInfo = urlParserResult.username.replace(/%3D/g, '=');
         // base64.decode throws as desired when given invalid base64 input.
-        var b64DecodedUserInfo = b64Decode(b64EncodedUserInfo);
+        var b64DecodedUserInfo = js_base64_1.Base64.decode(b64EncodedUserInfo);
         var colonIdx = b64DecodedUserInfo.indexOf(':');
         if (colonIdx === -1) {
             throw new InvalidUri("Missing password");
@@ -349,7 +342,7 @@ exports.SIP002_URI = {
     },
     stringify: function (config) {
         var host = config.host, port = config.port, method = config.method, password = config.password, tag = config.tag, extra = config.extra;
-        var userInfo = b64Encode(method.data + ":" + password.data);
+        var userInfo = js_base64_1.Base64.encode(method.data + ':' + password.data);
         var uriHost = exports.SHADOWSOCKS_URI.getUriFormattedHost(host);
         var hash = exports.SHADOWSOCKS_URI.getHash(tag);
         var queryString = '';

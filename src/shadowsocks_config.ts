@@ -12,17 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/* tslint:disable */
-const isBrowser = typeof window !== 'undefined';
-const b64Encode = isBrowser ? btoa : require('base-64').encode;
-const b64Decode = isBrowser ? atob : require('base-64').decode;
-const URL = isBrowser ? window.URL : require('url').URL;
-const punycode = isBrowser ? (window as any).punycode : require('punycode');
-if (!punycode) {
-  throw new Error(`Could not find punycode. Did you forget to add e.g.
-  <script src="bower_components/punycode/punycode.min.js"></script>?`);
-}
-/* tslint:enable */
+import {Base64} from 'js-base64';
+import * as punycode from 'punycode';
 
 // Custom error base class
 export class ShadowsocksConfigError extends Error {
@@ -233,7 +224,7 @@ export const LEGACY_BASE64_URI = {
     const tagStartIndex = hasTag ? hashIndex + 1 : uri.length;
     const tag = new Tag(decodeURIComponent(uri.substring(tagStartIndex)));
     const b64EncodedData = uri.substring('ss://'.length, b64EndIndex);
-    const b64DecodedData = b64Decode(b64EncodedData);
+    const b64DecodedData = Base64.decode(b64EncodedData);
     const atSignIndex = b64DecodedData.lastIndexOf('@');
     if (atSignIndex === -1) {
       throw new InvalidUri(`Missing "@"`);
@@ -273,7 +264,7 @@ export const LEGACY_BASE64_URI = {
   stringify: (config: Config) => {
     const {host, port, method, password, tag} = config;
     const hash = SHADOWSOCKS_URI.getHash(tag);
-    let b64EncodedData = b64Encode(`${method.data}:${password.data}@${host.data}:${port.data}`);
+    let b64EncodedData = Base64.encode(`${method.data}:${password.data}@${host.data}:${port.data}`);
     const dataLength = b64EncodedData.length;
     let paddingLength = 0;
     for (; b64EncodedData[dataLength - 1 - paddingLength] === '='; paddingLength++);
@@ -302,13 +293,13 @@ export const SIP002_URI = {
     if (!parsedPort && uri.match(/:80($|\/)/g)) {
       // The default URL parser fails to recognize the default port (80) when the URI being parsed
       // is HTTP. Check if the port is present at the end of the string or before the parameters.
-      parsedPort = 80;
+      parsedPort = '80';
     }
     const port = new Port(parsedPort);
     const tag = new Tag(decodeURIComponent(urlParserResult.hash.substring(1)));
     const b64EncodedUserInfo = urlParserResult.username.replace(/%3D/g, '=');
     // base64.decode throws as desired when given invalid base64 input.
-    const b64DecodedUserInfo = b64Decode(b64EncodedUserInfo);
+    const b64DecodedUserInfo = Base64.decode(b64EncodedUserInfo);
     const colonIdx = b64DecodedUserInfo.indexOf(':');
     if (colonIdx === -1) {
       throw new InvalidUri(`Missing password`);
@@ -329,7 +320,7 @@ export const SIP002_URI = {
 
   stringify: (config: Config) => {
     const {host, port, method, password, tag, extra} = config;
-    const userInfo = b64Encode(`${method.data}:${password.data}`);
+    const userInfo = Base64.encode(`${method.data}:${password.data}`);
     const uriHost = SHADOWSOCKS_URI.getUriFormattedHost(host);
     const hash = SHADOWSOCKS_URI.getHash(tag);
     let queryString = '';
