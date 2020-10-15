@@ -23,8 +23,8 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var punycode = require('punycode');
 var js_base64_1 = require('js-base64');
+var punycode = require('punycode');
 // Custom error base class
 var ShadowsocksConfigError = /** @class */ (function (_super) {
     __extends(ShadowsocksConfigError, _super);
@@ -353,4 +353,53 @@ exports.SIP002_URI = {
         }
         return "ss://" + userInfo + "@" + uriHost + ":" + port.data + "/" + queryString + hash;
     },
+};
+// Ref: https://github.com/shadowsocks/shadowsocks-org/issues/89
+exports.SIP008_URI = {
+  PROTOCOL: 'ssconf',
+  validateProtocol: function(uri) {
+    if (!uri || !uri.startsWith(exports.SIP008_URI.PROTOCOL)) {
+      throw new InvalidUri('URI must start with "' + exports.SIP008_URI.PROTOCOL + '"');
+    }
+  },
+  parse: function(uri) {
+    exports.SIP008_URI.validateProtocol(uri);
+    // URL parser for expedience, replacing the protocol "ssconf" with "https" to ensure correct
+    // results, otherwise browsers like Safari fail to parse it.
+    var inputForUrlParser =
+        'https' + decodeURIComponent(uri.substring(exports.SIP008_URI.PROTOCOL.length));
+    // The built-in URL parser throws as desired when given URIs with invalid syntax.
+    var urlParserResult = new URL(inputForUrlParser);
+    // Use ValidatedConfigFields subclasses (Host, Port, Tag) to throw on validation failure.
+    var uriFormattedHost = urlParserResult.hostname;
+    var host;
+    try {
+      host = new Host(uriFormattedHost);
+    } catch (_) {
+      // Could be IPv6 host formatted with surrounding brackets, so try stripping first and last
+      // characters. If this throws, give up and let the exception propagate.
+      host = new Host(uriFormattedHost.substring(1, uriFormattedHost.length - 1));
+    }
+    // The default URL parser fails to recognize the default HTTPs port (443).
+    var port = new Port(urlParserResult.port || '443');
+    // Parse extra parameters from the tag, which has the format `#key0=val0;key1=val1...[;]`
+    var extra = {};
+    var tag = new Tag(decodeURIComponent(urlParserResult.hash.substring(1)));
+    for (var _i = 0, _a = tag.data.split(';'); _i < _a.length; _i++) {
+      var pair = _a[_i];
+      var _b = pair.split('=', 2), key = _b[0], value = _b[1];
+      if (!key) {
+        continue;
+      }
+      extra[key] = value;
+    }
+    var config = {
+      // Build the access URL with the parsed parameters. Exclude the query string, as the spec
+      // recommends against it.
+      accessUrl:
+          new URL('https://' + uriFormattedHost + ':' + port.data + urlParserResult.pathname),
+      extra: extra
+    };
+    return config;
+  },
 };

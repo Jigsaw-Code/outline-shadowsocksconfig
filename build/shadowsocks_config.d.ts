@@ -63,3 +63,10 @@ export declare const SIP002_URI: {
     parse: (uri: string) => Config;
     stringify: (config: Config) => string;
 };
+export interface DynamicConfig {
+  accessUrl: URL;
+  extra: {[key: string]: string;};
+}
+export declare const SIP008_URI: {
+  PROTOCOL: string; validateProtocol: (uri: string) => void; parse: (uri: string) => DynamicConfig;
+};

@@ -331,3 +331,62 @@ export const SIP002_URI = {
     return `ss://${userInfo}@${uriHost}:${port.data}/${queryString}${hash}`;
   },
 };
+
+export interface DynamicConfig {
+  accessUrl: URL;
+  // Any additional configuration (e.g. `timeout`, SIP003 `plugin`, etc.) may be stored here.
+  extra: {[key: string]: string};
+}
+
+// Ref: https://github.com/shadowsocks/shadowsocks-org/issues/89
+export const SIP008_URI = {
+  PROTOCOL: 'ssconf',
+
+  validateProtocol: (uri: string) => {
+    if (!uri || !uri.startsWith(SIP008_URI.PROTOCOL)) {
+      throw new InvalidUri(`URI must start with "${SIP008_URI.PROTOCOL}"`);
+    }
+  },
+
+  parse: (uri: string): DynamicConfig => {
+    SIP008_URI.validateProtocol(uri);
+
+    // URL parser for expedience, replacing the protocol "ssconf" with "https" to ensure correct
+    // results, otherwise browsers like Safari fail to parse it.
+    const inputForUrlParser =
+        `https${decodeURIComponent(uri.substring(SIP008_URI.PROTOCOL.length))}`;
+    // The built-in URL parser throws as desired when given URIs with invalid syntax.
+    const urlParserResult = new URL(inputForUrlParser);
+    // Use ValidatedConfigFields subclasses (Host, Port, Tag) to throw on validation failure.
+    const uriFormattedHost = urlParserResult.hostname;
+    let host: Host;
+    try {
+      host = new Host(uriFormattedHost);
+    } catch (_) {
+      // Could be IPv6 host formatted with surrounding brackets, so try stripping first and last
+      // characters. If this throws, give up and let the exception propagate.
+      host = new Host(uriFormattedHost.substring(1, uriFormattedHost.length - 1));
+    }
+    // The default URL parser fails to recognize the default HTTPs port (443).
+    const port = new Port(urlParserResult.port || '443');
+
+    // Parse extra parameters from the tag, which has the format `#key0=val0;key1=val1...[;]`
+    const extra = {} as {[key: string]: string};
+    const tag = new Tag(decodeURIComponent(urlParserResult.hash.substring(1)));
+    for (const pair of tag.data.split(';')) {
+      const [key, value] = pair.split('=', 2);
+      if (!key) {
+        continue;
+      }
+      extra[key] = value;
+    }
+
+    const config: DynamicConfig = {
+      // Build the access URL with the parsed parameters. Exclude the query string, as the spec
+      // recommends against it.
+      accessUrl: new URL(`https://${uriFormattedHost}:${port.data}${urlParserResult.pathname}`),
+      extra
+    };
+    return config;
+  },
+};
