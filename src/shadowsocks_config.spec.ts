@@ -16,6 +16,7 @@ import {
   Host, Port, Method, Password, Tag, Config, makeConfig,
   SHADOWSOCKS_URI, SIP002_URI, LEGACY_BASE64_URI, InvalidConfigField, InvalidUri,
 } from './shadowsocks_config';
+import {Base64} from 'js-base64';
 
 describe('shadowsocks_config', () => {
   describe('Config API', () => {
@@ -195,7 +196,19 @@ describe('shadowsocks_config', () => {
         tag: 'Foo Bar',
       });
       expect(SIP002_URI.stringify(config)).toEqual(
-        'ss://YWVzLTEyOC1nY206dGVzdA==@192.168.100.1:8888/#Foo%20Bar');
+        'ss://YWVzLTEyOC1nY206dGVzdA@192.168.100.1:8888/#Foo%20Bar');
+    });
+
+    it('can serialize a SIP002 URI with a non-latin password', () => {
+      const config = makeConfig({
+        host: '192.168.100.1',
+        port: '8888',
+        method: 'aes-128-gcm',
+        password: '小洞不补大洞吃苦',
+        tag: 'Foo Bar',
+      });
+      expect(SIP002_URI.stringify(config)).toEqual(
+        'ss://YWVzLTEyOC1nY2065bCP5rSe5LiN6KGl5aSn5rSe5ZCD6Ium@192.168.100.1:8888/#Foo%20Bar');
     });
 
     it('can serialize a SIP002 URI with IPv6 host', () => {
@@ -207,7 +220,7 @@ describe('shadowsocks_config', () => {
         tag: 'Foo Bar',
       });
       expect(SIP002_URI.stringify(config)).toEqual(
-        'ss://YWVzLTEyOC1nY206dGVzdA==@[2001:0:ce49:7601:e866:efff:62c3:fffe]:8888/#Foo%20Bar');
+        'ss://YWVzLTEyOC1nY206dGVzdA@[2001:0:ce49:7601:e866:efff:62c3:fffe]:8888/#Foo%20Bar');
     });
 
     it('can serialize a legacy base64 URI', () => {
@@ -221,6 +234,18 @@ describe('shadowsocks_config', () => {
       expect(LEGACY_BASE64_URI.stringify(config)).toEqual(
         'ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xMDAuMTo4ODg4#Foo%20Bar');
     });
+
+    it('can serialize a legacy base64 URI with a non-latin password', () => {
+      const config = makeConfig({
+        host: '192.168.100.1',
+        port: '8888',
+        method: 'bf-cfb',
+        password: '小洞不补大洞吃苦',
+        tag: 'Foo Bar',
+      });
+      expect(LEGACY_BASE64_URI.stringify(config)).toEqual(
+        'ss://YmYtY2ZiOuWwj-a0nuS4jeihpeWkp-a0nuWQg-iLpkAxOTIuMTY4LjEwMC4xOjg4ODg#Foo%20Bar');
+    });
   });
 
   describe('URI parser', () => {
@@ -230,6 +255,16 @@ describe('shadowsocks_config', () => {
     });
 
     it('can parse a valid SIP002 URI with IPv4 host', () => {
+      const input = 'ss://YWVzLTEyOC1nY206dGVzdA@192.168.100.1:8888#Foo%20Bar';
+      const config = SHADOWSOCKS_URI.parse(input);
+      expect(config.method.data).toEqual('aes-128-gcm');
+      expect(config.password.data).toEqual('test');
+      expect(config.host.data).toEqual('192.168.100.1');
+      expect(config.port.data).toEqual(8888);
+      expect(config.tag.data).toEqual('Foo Bar');
+    });
+
+    it('can parse a SIP002 URI with non-uri-safe base64 padding', () => {
       const input = 'ss://YWVzLTEyOC1nY206dGVzdA==@192.168.100.1:8888#Foo%20Bar';
       const config = SHADOWSOCKS_URI.parse(input);
       expect(config.method.data).toEqual('aes-128-gcm');
@@ -240,7 +275,7 @@ describe('shadowsocks_config', () => {
     });
 
     it('can parse a valid SIP002 URI with IPv6 host', () => {
-      const input = 'ss://YWVzLTEyOC1nY206dGVzdA==@[2001:0:ce49:7601:e866:efff:62c3:fffe]:8888';
+      const input = 'ss://YWVzLTEyOC1nY206dGVzdA@[2001:0:ce49:7601:e866:efff:62c3:fffe]:8888';
       const config = SHADOWSOCKS_URI.parse(input);
       expect(config.method.data).toEqual('aes-128-gcm');
       expect(config.password.data).toEqual('test');
@@ -248,8 +283,17 @@ describe('shadowsocks_config', () => {
       expect(config.port.data).toEqual(8888);
     });
 
-    it('can parse a valid SIP002 URI with an arbitray query param', () => {
-      const input = 'ss://cmM0LW1kNTpwYXNzd2Q=@192.168.100.1:8888/?foo=1';
+    it('can parse a valid SIP002 URI with a non-latin password', () => {
+      const input = 'ss://YWVzLTEyOC1nY2065bCP5rSe5LiN6KGl5aSn5rSe5ZCD6Ium@192.168.100.1:8888';
+      const config = SHADOWSOCKS_URI.parse(input);
+      expect(config.method.data).toEqual('aes-128-gcm');
+      expect(config.password.data).toEqual('小洞不补大洞吃苦');
+      expect(config.host.data).toEqual('192.168.100.1');
+      expect(config.port.data).toEqual(8888);
+    });
+
+    it('can parse a valid SIP002 URI with an arbitrary query param', () => {
+      const input = 'ss://cmM0LW1kNTpwYXNzd2Q@192.168.100.1:8888/?foo=1';
       const config = SHADOWSOCKS_URI.parse(input);
       expect(config.extra.foo!).toEqual('1');
     });
@@ -262,7 +306,7 @@ describe('shadowsocks_config', () => {
     });
 
     it('can parse a valid SIP002 URI with a plugin param', () => {
-      const input = 'ss://cmM0LW1kNTpwYXNzd2Q=@192.168.100.1:8888/?plugin=obfs-local%3Bobfs%3Dhttp';
+      const input = 'ss://cmM0LW1kNTpwYXNzd2Q@192.168.100.1:8888/?plugin=obfs-local%3Bobfs%3Dhttp';
       const config = SHADOWSOCKS_URI.parse(input);
       expect(config.method.data).toEqual('rc4-md5');
       expect(config.password.data).toEqual('passwd');
@@ -272,7 +316,7 @@ describe('shadowsocks_config', () => {
     });
 
     it('can parse a valid SIP002 URI with the default HTTP port and no plugin parameters', () => {
-      const input = 'ss://cmM0LW1kNTpwYXNzd2Q=@192.168.100.1:80';
+      const input = 'ss://cmM0LW1kNTpwYXNzd2Q@192.168.100.1:80';
       const config = SHADOWSOCKS_URI.parse(input);
       expect(config.method.data).toEqual('rc4-md5');
       expect(config.password.data).toEqual('passwd');
@@ -281,7 +325,7 @@ describe('shadowsocks_config', () => {
     });
 
     it('can parse a valid SIP002 URI with the default HTTP port and parameters', () => {
-      const input = 'ss://cmM0LW1kNTpwYXNzd2Q=@192.168.100.1:80/?foo=1&bar=';
+      const input = 'ss://cmM0LW1kNTpwYXNzd2Q@192.168.100.1:80/?foo=1&bar=';
       const config = SHADOWSOCKS_URI.parse(input);
       expect(config.method.data).toEqual('rc4-md5');
       expect(config.password.data).toEqual('passwd');
@@ -316,6 +360,16 @@ describe('shadowsocks_config', () => {
       expect(config.port.data).toEqual(80);
       expect(config.method.data).toEqual('chacha20-ietf-poly1305');
       expect(config.password.data).toEqual('passw0rd');
+    });
+
+    it('can parse a valid legacy base64 URI with a non-latin password', () => {
+      const input = 'ss://YmYtY2ZiOuWwj-a0nuS4jeihpeWkp-a0nuWQg-iLpkAxOTIuMTY4LjEwMC4xOjg4ODg#Foo%20Bar';
+      const config = SHADOWSOCKS_URI.parse(input);
+      expect(config.method.data).toEqual('bf-cfb');
+      expect(config.password.data).toEqual('小洞不补大洞吃苦');
+      expect(config.host.data).toEqual('192.168.100.1');
+      expect(config.port.data).toEqual(8888);
+      expect(config.tag.data).toEqual('Foo Bar');
     });
 
     it('throws when parsing empty input', () => {
