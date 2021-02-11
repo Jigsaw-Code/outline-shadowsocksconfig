@@ -264,12 +264,8 @@ export const LEGACY_BASE64_URI = {
   stringify: (config: Config) => {
     const {host, port, method, password, tag} = config;
     const hash = SHADOWSOCKS_URI.getHash(tag);
-    let b64EncodedData = Base64.encode(`${method.data}:${password.data}@${host.data}:${port.data}`);
-    const dataLength = b64EncodedData.length;
-    let paddingLength = 0;
-    for (; b64EncodedData[dataLength - 1 - paddingLength] === '='; paddingLength++);
-    b64EncodedData = paddingLength === 0 ? b64EncodedData :
-        b64EncodedData.substring(0, dataLength - paddingLength);
+    const data = `${method.data}:${password.data}@${host.data}:${port.data}`;
+    const b64EncodedData = Base64.encodeURI(data);
     return `ss://${b64EncodedData}${hash}`;
   },
 };
@@ -320,7 +316,7 @@ export const SIP002_URI = {
 
   stringify: (config: Config) => {
     const {host, port, method, password, tag, extra} = config;
-    const userInfo = Base64.encode(`${method.data}:${password.data}`);
+    const userInfo = Base64.encodeURI(`${method.data}:${password.data}`);
     const uriHost = SHADOWSOCKS_URI.getUriFormattedHost(host);
     const hash = SHADOWSOCKS_URI.getHash(tag);
     let queryString = '';

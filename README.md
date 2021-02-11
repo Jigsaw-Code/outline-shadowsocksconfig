@@ -42,6 +42,12 @@ for example usage.
 
 First [install yarn](https://yarnpkg.com/en/docs/install-ci).
 
+Then, install dependencies using yarn:
+
+```
+yarn
+```
+
 Then, build with the included script:
 
 ```

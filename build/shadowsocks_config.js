@@ -23,8 +23,8 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var punycode = require('punycode');
-var js_base64_1 = require('js-base64');
+var js_base64_1 = require("js-base64");
+var punycode = require("punycode");
 // Custom error base class
 var ShadowsocksConfigError = /** @class */ (function (_super) {
     __extends(ShadowsocksConfigError, _super);
@@ -284,14 +284,8 @@ exports.LEGACY_BASE64_URI = {
     stringify: function (config) {
         var host = config.host, port = config.port, method = config.method, password = config.password, tag = config.tag;
         var hash = exports.SHADOWSOCKS_URI.getHash(tag);
-        var b64EncodedData = js_base64_1.Base64.encode(
-            method.data + ':' + password.data + '@' + host.data + ':' + port.data);
-        var dataLength = b64EncodedData.length;
-        var paddingLength = 0;
-        for (; b64EncodedData[dataLength - 1 - paddingLength] === '='; paddingLength++)
-            ;
-        b64EncodedData = paddingLength === 0 ? b64EncodedData :
-            b64EncodedData.substring(0, dataLength - paddingLength);
+        var data = method.data + ":" + password.data + "@" + host.data + ":" + port.data;
+        var b64EncodedData = js_base64_1.Base64.encodeURI(data);
         return "ss://" + b64EncodedData + hash;
     },
 };
@@ -342,7 +336,7 @@ exports.SIP002_URI = {
     },
     stringify: function (config) {
         var host = config.host, port = config.port, method = config.method, password = config.password, tag = config.tag, extra = config.extra;
-        var userInfo = js_base64_1.Base64.encode(method.data + ':' + password.data);
+        var userInfo = js_base64_1.Base64.encodeURI(method.data + ":" + password.data);
         var uriHost = exports.SHADOWSOCKS_URI.getUriFormattedHost(host);
         var hash = exports.SHADOWSOCKS_URI.getHash(tag);
         var queryString = '';
