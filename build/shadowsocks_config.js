@@ -285,7 +285,11 @@ exports.LEGACY_BASE64_URI = {
         var host = config.host, port = config.port, method = config.method, password = config.password, tag = config.tag;
         var hash = exports.SHADOWSOCKS_URI.getHash(tag);
         var data = method.data + ":" + password.data + "@" + host.data + ":" + port.data;
-        var b64EncodedData = js_base64_1.Base64.encodeURI(data);
+        var b64EncodedData = js_base64_1.Base64.encode(data);
+        // Remove "=" padding
+        while (b64EncodedData.slice(-1) == "=") {
+            b64EncodedData = b64EncodedData.slice(0, -1);
+        }
         return "ss://" + b64EncodedData + hash;
     },
 };

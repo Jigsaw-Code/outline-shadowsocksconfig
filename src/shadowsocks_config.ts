@@ -265,7 +265,11 @@ export const LEGACY_BASE64_URI = {
     const {host, port, method, password, tag} = config;
     const hash = SHADOWSOCKS_URI.getHash(tag);
     const data = `${method.data}:${password.data}@${host.data}:${port.data}`;
-    const b64EncodedData = Base64.encodeURI(data);
+    let b64EncodedData = Base64.encode(data);
+    // Remove "=" padding
+    while (b64EncodedData.slice(-1) == "=") {
+      b64EncodedData = b64EncodedData.slice(0, -1)
+    }
     return `ss://${b64EncodedData}${hash}`;
   },
 };
