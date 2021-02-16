@@ -244,7 +244,7 @@ describe('shadowsocks_config', () => {
         tag: 'Foo Bar',
       });
       expect(LEGACY_BASE64_URI.stringify(config)).toEqual(
-        'ss://YmYtY2ZiOuWwj-a0nuS4jeihpeWkp-a0nuWQg-iLpkAxOTIuMTY4LjEwMC4xOjg4ODg#Foo%20Bar');
+        'ss://YmYtY2ZiOuWwj+a0nuS4jeihpeWkp+a0nuWQg+iLpkAxOTIuMTY4LjEwMC4xOjg4ODg#Foo%20Bar');
     });
   });
 
@@ -363,7 +363,7 @@ describe('shadowsocks_config', () => {
     });
 
     it('can parse a valid legacy base64 URI with a non-latin password', () => {
-      const input = 'ss://YmYtY2ZiOuWwj-a0nuS4jeihpeWkp-a0nuWQg-iLpkAxOTIuMTY4LjEwMC4xOjg4ODg#Foo%20Bar';
+      const input = 'ss://YmYtY2ZiOuWwj+a0nuS4jeihpeWkp+a0nuWQg+iLpkAxOTIuMTY4LjEwMC4xOjg4ODg#Foo%20Bar';
       const config = SHADOWSOCKS_URI.parse(input);
       expect(config.method.data).toEqual('bf-cfb');
       expect(config.password.data).toEqual('小洞不补大洞吃苦');
