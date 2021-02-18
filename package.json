@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc",
     "test": "yarn build && jasmine --config=jasmine.json",
-    "clean": "rm -rf build/*.spec.* node_modules/"
+    "clean": "rm -rf build/ node_modules/"
   },
   "main": "./build/shadowsocks_config.js",
   "types": "./build/shadowsocks_config.d.ts",
