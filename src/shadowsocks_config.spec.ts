@@ -49,11 +49,29 @@ describe('shadowsocks_config', () => {
       }
     });
 
-    it('accepts IPv6 address hosts', () => {
-      // IPv6 '::' shorthand is unsupported, so '::1' would fail here.
+    it('preserves normalized IPv6 address hosts', () => {
       for (const valid of ['0:0:0:0:0:0:0:1', '2001:0:ce49:7601:e866:efff:62c3:fffe']) {
         const host = new Host(valid);
         expect(host.data).toEqual(valid);
+        expect(host.isIPv4).toBeFalsy();
+        expect(host.isIPv6).toBeTruthy();
+        expect(host.isHostname).toBeFalsy();
+      }
+    });
+
+    it('normalizes IPv6 address hosts', () => {
+      const testCases = [
+        // Canonical form
+        ['::1', '0:0:0:0:0:0:0:1'],
+        ['2001:db8::', '2001:db8:0:0:0:0:0:0'],
+        // Expanded form
+        ['1:02:003:0004:005:06:7:08', '1:2:3:4:5:6:7:8'],
+        // IPv4-mapped form
+        ['::ffff:192.0.2.128', '0:0:0:0:0:ffff:c000:280']
+      ]
+      for (const [input, expanded] of testCases) {
+        const host = new Host(input);
+        expect(host.data).toEqual(expanded);
         expect(host.isIPv4).toBeFalsy();
         expect(host.isIPv6).toBeTruthy();
         expect(host.isHostname).toBeFalsy();

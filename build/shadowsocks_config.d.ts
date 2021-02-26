@@ -8,8 +8,6 @@ export declare class InvalidUri extends ShadowsocksConfigError {
 export declare abstract class ValidatedConfigField {
 }
 export declare class Host extends ValidatedConfigField {
-    static IPV4_PATTERN: RegExp;
-    static IPV6_PATTERN: RegExp;
     static HOSTNAME_PATTERN: RegExp;
     readonly data: string;
     readonly isIPv4: boolean;

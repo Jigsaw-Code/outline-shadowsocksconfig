@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {Base64} from 'js-base64';
+import * as ipaddr from 'ipaddr.js'
 import * as punycode from 'punycode';
 
 // Custom error base class
@@ -37,13 +38,11 @@ function throwErrorForInvalidField(name: string, value: {}, reason?: string) {
 }
 
 export class Host extends ValidatedConfigField {
-  public static IPV4_PATTERN = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
-  public static IPV6_PATTERN = /^(?:[A-F0-9]{1,4}:){7}[A-F0-9]{1,4}$/i;
   public static HOSTNAME_PATTERN = /^[A-z0-9]+[A-z0-9_.-]*$/;
   public readonly data: string;
-  public readonly isIPv4: boolean;
-  public readonly isIPv6: boolean;
-  public readonly isHostname: boolean;
+  public readonly isIPv4: boolean = false;
+  public readonly isIPv6: boolean = false;
+  public readonly isHostname: boolean = false;
 
   constructor(host: Host | string) {
     super();
@@ -53,12 +52,20 @@ export class Host extends ValidatedConfigField {
     if (host instanceof Host) {
       host = host.data;
     }
-    host = punycode.toASCII(host) as string;
-    this.isIPv4 = Host.IPV4_PATTERN.test(host);
-    this.isIPv6 = this.isIPv4 ? false : Host.IPV6_PATTERN.test(host);
-    this.isHostname = this.isIPv4 || this.isIPv6 ? false : Host.HOSTNAME_PATTERN.test(host);
-    if (!(this.isIPv4 || this.isIPv6 || this.isHostname)) {
-      throwErrorForInvalidField('host', host);
+    if (ipaddr.isValid(host)) {
+      const ip = ipaddr.parse(host)
+      this.isIPv4 = ip.kind() == "ipv4"
+      this.isIPv6 = ip.kind() == "ipv6"
+      // Previous versions of outline-ShadowsocksConfig only accept
+      // IPv6 in normalized (expanded) form, so we normalize the
+      // input here to ensure that access keys remain compatible.
+      host = ip.toNormalizedString()
+    } else {
+      host = punycode.toASCII(host) as string;
+      this.isHostname = Host.HOSTNAME_PATTERN.test(host);
+      if (!this.isHostname) {
+        throwErrorForInvalidField('host', host);
+      }
     }
     this.data = host;
   }
