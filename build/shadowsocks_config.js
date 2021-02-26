@@ -85,7 +85,7 @@ var Host = /** @class */ (function (_super) {
             _this.isIPv6 = ip.kind() == "ipv6";
             // Previous versions of outline-ShadowsocksConfig only accept
             // IPv6 in normalized (expanded) form, so we normalize the
-            // input here.
+            // input here to ensure that access keys remain compatible.
             host = ip.toNormalizedString();
         }
         else {

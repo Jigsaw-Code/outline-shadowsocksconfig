@@ -301,6 +301,15 @@ describe('shadowsocks_config', () => {
       expect(config.port.data).toEqual(8888);
     });
 
+    it('can parse a valid SIP002 URI with a compressed IPv6 host', () => {
+      const input = 'ss://YWVzLTEyOC1nY206dGVzdA@[2001::fffe]:8888';
+      const config = SHADOWSOCKS_URI.parse(input);
+      expect(config.method.data).toEqual('aes-128-gcm');
+      expect(config.password.data).toEqual('test');
+      expect(config.host.data).toEqual('2001:0:0:0:0:0:0:fffe');
+      expect(config.port.data).toEqual(8888);
+    });
+
     it('can parse a valid SIP002 URI with a non-latin password', () => {
       const input = 'ss://YWVzLTEyOC1nY2065bCP5rSe5LiN6KGl5aSn5rSe5ZCD6Ium@192.168.100.1:8888';
       const config = SHADOWSOCKS_URI.parse(input);
