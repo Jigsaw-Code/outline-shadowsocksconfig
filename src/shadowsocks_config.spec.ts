@@ -49,11 +49,29 @@ describe('shadowsocks_config', () => {
       }
     });
 
-    it('accepts IPv6 address hosts', () => {
-      // IPv6 '::' shorthand is unsupported, so '::1' would fail here.
+    it('preserves normalized IPv6 address hosts', () => {
       for (const valid of ['0:0:0:0:0:0:0:1', '2001:0:ce49:7601:e866:efff:62c3:fffe']) {
         const host = new Host(valid);
         expect(host.data).toEqual(valid);
+        expect(host.isIPv4).toBeFalsy();
+        expect(host.isIPv6).toBeTruthy();
+        expect(host.isHostname).toBeFalsy();
+      }
+    });
+
+    it('normalizes IPv6 address hosts', () => {
+      const testCases = [
+        // Canonical form
+        ['::1', '0:0:0:0:0:0:0:1'],
+        ['2001:db8::', '2001:db8:0:0:0:0:0:0'],
+        // Expanded form
+        ['1:02:003:0004:005:06:7:08', '1:2:3:4:5:6:7:8'],
+        // IPv4-mapped form
+        ['::ffff:192.0.2.128', '0:0:0:0:0:ffff:c000:280']
+      ]
+      for (const [input, expanded] of testCases) {
+        const host = new Host(input);
+        expect(host.data).toEqual(expanded);
         expect(host.isIPv4).toBeFalsy();
         expect(host.isIPv6).toBeTruthy();
         expect(host.isHostname).toBeFalsy();
@@ -280,6 +298,15 @@ describe('shadowsocks_config', () => {
       expect(config.method.data).toEqual('aes-128-gcm');
       expect(config.password.data).toEqual('test');
       expect(config.host.data).toEqual('2001:0:ce49:7601:e866:efff:62c3:fffe');
+      expect(config.port.data).toEqual(8888);
+    });
+
+    it('can parse a valid SIP002 URI with a compressed IPv6 host', () => {
+      const input = 'ss://YWVzLTEyOC1nY206dGVzdA@[2001::fffe]:8888';
+      const config = SHADOWSOCKS_URI.parse(input);
+      expect(config.method.data).toEqual('aes-128-gcm');
+      expect(config.password.data).toEqual('test');
+      expect(config.host.data).toEqual('2001:0:0:0:0:0:0:fffe');
       expect(config.port.data).toEqual(8888);
     });
 

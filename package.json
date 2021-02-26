@@ -19,6 +19,7 @@
     "typescript": "^2.5.3"
   },
   "dependencies": {
+    "ipaddr.js": "^2.0.0",
     "js-base64": "^3.5.2",
     "punycode": "^1.4.1"
   },

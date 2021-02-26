@@ -24,6 +24,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var js_base64_1 = require("js-base64");
+var ipaddr = require("ipaddr.js");
 var punycode = require("punycode");
 // Custom error base class
 var ShadowsocksConfigError = /** @class */ (function (_super) {
@@ -69,24 +70,34 @@ var Host = /** @class */ (function (_super) {
     __extends(Host, _super);
     function Host(host) {
         var _this = _super.call(this) || this;
+        _this.isIPv4 = false;
+        _this.isIPv6 = false;
+        _this.isHostname = false;
         if (!host) {
             throwErrorForInvalidField('host', host);
         }
         if (host instanceof Host) {
             host = host.data;
         }
-        host = punycode.toASCII(host);
-        _this.isIPv4 = Host.IPV4_PATTERN.test(host);
-        _this.isIPv6 = _this.isIPv4 ? false : Host.IPV6_PATTERN.test(host);
-        _this.isHostname = _this.isIPv4 || _this.isIPv6 ? false : Host.HOSTNAME_PATTERN.test(host);
-        if (!(_this.isIPv4 || _this.isIPv6 || _this.isHostname)) {
-            throwErrorForInvalidField('host', host);
+        if (ipaddr.isValid(host)) {
+            var ip = ipaddr.parse(host);
+            _this.isIPv4 = ip.kind() == "ipv4";
+            _this.isIPv6 = ip.kind() == "ipv6";
+            // Previous versions of outline-ShadowsocksConfig only accept
+            // IPv6 in normalized (expanded) form, so we normalize the
+            // input here to ensure that access keys remain compatible.
+            host = ip.toNormalizedString();
+        }
+        else {
+            host = punycode.toASCII(host);
+            _this.isHostname = Host.HOSTNAME_PATTERN.test(host);
+            if (!_this.isHostname) {
+                throwErrorForInvalidField('host', host);
+            }
         }
         _this.data = host;
         return _this;
     }
-    Host.IPV4_PATTERN = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
-    Host.IPV6_PATTERN = /^(?:[A-F0-9]{1,4}:){7}[A-F0-9]{1,4}$/i;
     Host.HOSTNAME_PATTERN = /^[A-z0-9]+[A-z0-9_.-]*$/;
     return Host;
 }(ValidatedConfigField));
