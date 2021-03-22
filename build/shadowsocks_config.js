@@ -396,8 +396,7 @@ exports.SIP008_URI = {
     var config = {
       // Build the access URL with the parsed parameters. Exclude the query string, as the spec
       // recommends against it.
-      accessUrl:
-          new URL('https://' + uriFormattedHost + ':' + port.data + urlParserResult.pathname),
+      url: 'https://' + uriFormattedHost + ':' + port.data + urlParserResult.pathname,
       extra: extra
     };
     return config;

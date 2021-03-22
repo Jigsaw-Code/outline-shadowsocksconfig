@@ -333,7 +333,7 @@ export const SIP002_URI = {
 };
 
 export interface DynamicConfig {
-  accessUrl: URL;
+  url: string;
   // Any additional configuration (e.g. `timeout`, SIP003 `plugin`, etc.) may be stored here.
   extra: {[key: string]: string};
 }
@@ -384,7 +384,7 @@ export const SIP008_URI = {
     const config: DynamicConfig = {
       // Build the access URL with the parsed parameters. Exclude the query string, as the spec
       // recommends against it.
-      accessUrl: new URL(`https://${uriFormattedHost}:${port.data}${urlParserResult.pathname}`),
+      url: `https://${uriFormattedHost}:${port.data}${urlParserResult.pathname}`,
       extra
     };
     return config;

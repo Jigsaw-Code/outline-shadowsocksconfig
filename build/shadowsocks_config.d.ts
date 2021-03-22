@@ -64,7 +64,7 @@ export declare const SIP002_URI: {
     stringify: (config: Config) => string;
 };
 export interface DynamicConfig {
-  accessUrl: URL;
+  url: string;
   extra: {[key: string]: string;};
 }
 export declare const SIP008_URI: {
