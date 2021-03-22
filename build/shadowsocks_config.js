@@ -23,8 +23,9 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+var ipaddr = require("ipaddr.js");
 var js_base64_1 = require('js-base64');
-var punycode = require('punycode');
+var punycode = require("punycode");
 // Custom error base class
 var ShadowsocksConfigError = /** @class */ (function (_super) {
     __extends(ShadowsocksConfigError, _super);
@@ -69,24 +70,34 @@ var Host = /** @class */ (function (_super) {
     __extends(Host, _super);
     function Host(host) {
         var _this = _super.call(this) || this;
+        _this.isIPv4 = false;
+        _this.isIPv6 = false;
+        _this.isHostname = false;
         if (!host) {
             throwErrorForInvalidField('host', host);
         }
         if (host instanceof Host) {
             host = host.data;
         }
-        host = punycode.toASCII(host);
-        _this.isIPv4 = Host.IPV4_PATTERN.test(host);
-        _this.isIPv6 = _this.isIPv4 ? false : Host.IPV6_PATTERN.test(host);
-        _this.isHostname = _this.isIPv4 || _this.isIPv6 ? false : Host.HOSTNAME_PATTERN.test(host);
-        if (!(_this.isIPv4 || _this.isIPv6 || _this.isHostname)) {
-            throwErrorForInvalidField('host', host);
+        if (ipaddr.isValid(host)) {
+            var ip = ipaddr.parse(host);
+            _this.isIPv4 = ip.kind() === 'ipv4';
+            _this.isIPv6 = ip.kind() === 'ipv6';
+            // Previous versions of outline-ShadowsocksConfig only accept
+            // IPv6 in normalized (expanded) form, so we normalize the
+            // input here to ensure that access keys remain compatible.
+            host = ip.toNormalizedString();
+        }
+        else {
+            host = punycode.toASCII(host);
+            _this.isHostname = Host.HOSTNAME_PATTERN.test(host);
+            if (!_this.isHostname) {
+                throwErrorForInvalidField('host', host);
+            }
         }
         _this.data = host;
         return _this;
     }
-    Host.IPV4_PATTERN = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
-    Host.IPV6_PATTERN = /^(?:[A-F0-9]{1,4}:){7}[A-F0-9]{1,4}$/i;
     Host.HOSTNAME_PATTERN = /^[A-z0-9]+[A-z0-9_.-]*$/;
     return Host;
 }(ValidatedConfigField));
@@ -284,14 +295,12 @@ exports.LEGACY_BASE64_URI = {
     stringify: function (config) {
         var host = config.host, port = config.port, method = config.method, password = config.password, tag = config.tag;
         var hash = exports.SHADOWSOCKS_URI.getHash(tag);
-        var b64EncodedData = js_base64_1.Base64.encode(
-            method.data + ':' + password.data + '@' + host.data + ':' + port.data);
-        var dataLength = b64EncodedData.length;
-        var paddingLength = 0;
-        for (; b64EncodedData[dataLength - 1 - paddingLength] === '='; paddingLength++)
-            ;
-        b64EncodedData = paddingLength === 0 ? b64EncodedData :
-            b64EncodedData.substring(0, dataLength - paddingLength);
+        var data = method.data + ":" + password.data + "@" + host.data + ":" + port.data;
+        var b64EncodedData = js_base64_1.Base64.encode(data);
+        // Remove "=" padding
+        while (b64EncodedData.slice(-1) === '=') {
+          b64EncodedData = b64EncodedData.slice(0, -1);
+        }
         return "ss://" + b64EncodedData + hash;
     },
 };
@@ -342,7 +351,7 @@ exports.SIP002_URI = {
     },
     stringify: function (config) {
         var host = config.host, port = config.port, method = config.method, password = config.password, tag = config.tag, extra = config.extra;
-        var userInfo = js_base64_1.Base64.encode(method.data + ':' + password.data);
+        var userInfo = js_base64_1.Base64.encodeURI(method.data + ":" + password.data);
         var uriHost = exports.SHADOWSOCKS_URI.getUriFormattedHost(host);
         var hash = exports.SHADOWSOCKS_URI.getHash(tag);
         var queryString = '';
@@ -356,49 +365,49 @@ exports.SIP002_URI = {
 };
 // Ref: https://github.com/shadowsocks/shadowsocks-org/issues/89
 exports.SIP008_URI = {
-  PROTOCOL: 'ssconf',
-  validateProtocol: function(uri) {
-    if (!uri || !uri.startsWith(exports.SIP008_URI.PROTOCOL)) {
-      throw new InvalidUri('URI must start with "' + exports.SIP008_URI.PROTOCOL + '"');
-    }
-  },
-  parse: function(uri) {
-    exports.SIP008_URI.validateProtocol(uri);
-    // URL parser for expedience, replacing the protocol "ssconf" with "https" to ensure correct
-    // results, otherwise browsers like Safari fail to parse it.
-    var inputForUrlParser =
-        'https' + decodeURIComponent(uri.substring(exports.SIP008_URI.PROTOCOL.length));
-    // The built-in URL parser throws as desired when given URIs with invalid syntax.
-    var urlParserResult = new URL(inputForUrlParser);
-    // Use ValidatedConfigFields subclasses (Host, Port, Tag) to throw on validation failure.
-    var uriFormattedHost = urlParserResult.hostname;
-    var host;
-    try {
-      host = new Host(uriFormattedHost);
-    } catch (_) {
-      // Could be IPv6 host formatted with surrounding brackets, so try stripping first and last
-      // characters. If this throws, give up and let the exception propagate.
-      host = new Host(uriFormattedHost.substring(1, uriFormattedHost.length - 1));
-    }
-    // The default URL parser fails to recognize the default HTTPs port (443).
-    var port = new Port(urlParserResult.port || '443');
-    // Parse extra parameters from the tag, which has the format `#key0=val0;key1=val1...[;]`
-    var extra = {};
-    var tag = new Tag(decodeURIComponent(urlParserResult.hash.substring(1)));
-    for (var _i = 0, _a = tag.data.split(';'); _i < _a.length; _i++) {
-      var pair = _a[_i];
-      var _b = pair.split('=', 2), key = _b[0], value = _b[1];
-      if (!key) {
-        continue;
-      }
-      extra[key] = value;
-    }
-    var config = {
-      // Build the access URL with the parsed parameters. Exclude the query string, as the spec
-      // recommends against it.
-      url: 'https://' + uriFormattedHost + ':' + port.data + urlParserResult.pathname,
-      extra: extra
-    };
-    return config;
-  },
+    PROTOCOL: 'ssconf',
+    validateProtocol: function (uri) {
+        if (!uri || !uri.startsWith(exports.SIP008_URI.PROTOCOL)) {
+            throw new InvalidUri("URI must start with \"" + exports.SIP008_URI.PROTOCOL + "\"");
+        }
+    },
+    parse: function (uri) {
+        exports.SIP008_URI.validateProtocol(uri);
+        // URL parser for expedience, replacing the protocol "ssconf" with "https" to ensure correct
+        // results, otherwise browsers like Safari fail to parse it.
+        var inputForUrlParser = "https" + decodeURIComponent(uri.substring(exports.SIP008_URI.PROTOCOL.length));
+        // The built-in URL parser throws as desired when given URIs with invalid syntax.
+        var urlParserResult = new URL(inputForUrlParser);
+        // Use ValidatedConfigFields subclasses (Host, Port, Tag) to throw on validation failure.
+        var uriFormattedHost = urlParserResult.hostname;
+        var host;
+        try {
+            host = new Host(uriFormattedHost);
+        }
+        catch (_) {
+            // Could be IPv6 host formatted with surrounding brackets, so try stripping first and last
+            // characters. If this throws, give up and let the exception propagate.
+            host = new Host(uriFormattedHost.substring(1, uriFormattedHost.length - 1));
+        }
+        // The default URL parser fails to recognize the default HTTPs port (443).
+        var port = new Port(urlParserResult.port || '443');
+        // Parse extra parameters from the tag, which has the format `#key0=val0;key1=val1...[;]`
+        var extra = {};
+        var tag = new Tag(decodeURIComponent(urlParserResult.hash.substring(1)));
+        for (var _i = 0, _a = tag.data.split(';'); _i < _a.length; _i++) {
+            var pair = _a[_i];
+            var _b = pair.split('=', 2), key = _b[0], value = _b[1];
+            if (!key) {
+                continue;
+            }
+            extra[key] = value;
+        }
+        var config = {
+            // Build the access URL with the parsed parameters. Exclude the query string, as the spec
+            // recommends against it.
+            url: "https://" + uriFormattedHost + ":" + port.data + urlParserResult.pathname,
+            extra: extra
+        };
+        return config;
+    },
 };

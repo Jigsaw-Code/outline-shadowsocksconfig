@@ -17,7 +17,6 @@ Some fields are validated, normalized, and/or sanitized, but not all:
 
 - `host`
   - May be an IPv4, IPv6, or hostname.
-  - IPv6 `::` shorthand is not currently supported.
   - Unicode hostnames are converted to punycode.
   - Hostnames must begin with a character in the set `[A-z0-9]`.
 - `port`
@@ -41,6 +40,12 @@ for example usage.
 ## Development
 
 First [install yarn](https://yarnpkg.com/en/docs/install-ci).
+
+Then, install dependencies using yarn:
+
+```
+yarn
+```
 
 Then, build with the included script:
 

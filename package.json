@@ -1,6 +1,6 @@
 {
   "name": "outline-shadowsocksconfig",
-  "version": "0.0.9",
+  "version": "0.1.4",
   "license": "Apache-2.0",
   "scripts": {
     "build": "tsc",
@@ -19,6 +19,7 @@
     "typescript": "^2.5.3"
   },
   "dependencies": {
+    "ipaddr.js": "^2.0.0",
     "js-base64": "^3.5.2",
     "punycode": "^1.4.1"
   },

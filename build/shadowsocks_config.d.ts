@@ -8,8 +8,6 @@ export declare class InvalidUri extends ShadowsocksConfigError {
 export declare abstract class ValidatedConfigField {
 }
 export declare class Host extends ValidatedConfigField {
-    static IPV4_PATTERN: RegExp;
-    static IPV6_PATTERN: RegExp;
     static HOSTNAME_PATTERN: RegExp;
     readonly data: string;
     readonly isIPv4: boolean;
@@ -64,9 +62,13 @@ export declare const SIP002_URI: {
     stringify: (config: Config) => string;
 };
 export interface DynamicConfig {
-  url: string;
-  extra: {[key: string]: string;};
+    url: string;
+    extra: {
+        [key: string]: string;
+    };
 }
 export declare const SIP008_URI: {
-  PROTOCOL: string; validateProtocol: (uri: string) => void; parse: (uri: string) => DynamicConfig;
+    PROTOCOL: string;
+    validateProtocol: (uri: string) => void;
+    parse: (uri: string) => DynamicConfig;
 };
