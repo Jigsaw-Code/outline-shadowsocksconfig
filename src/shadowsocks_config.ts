@@ -339,10 +339,11 @@ export const SIP002_URI = {
   },
 };
 
-export interface DynamicConfig {
-  url: string;
-  // Any additional configuration (e.g. `timeout`, SIP003 `plugin`, etc.) may be stored here.
-  extra: {[key: string]: string};
+export interface OnlineConfig {
+  // URL endpoint to retrieve a Shadowsocks configuration.
+  readonly url: string;
+  // Any additional configuration (e.g. `certFp`, `httpMethod`, etc.) may be stored here.
+  readonly extra: {[key: string]: string};
 }
 
 // Ref: https://github.com/shadowsocks/shadowsocks-org/issues/89
@@ -355,7 +356,7 @@ export const SIP008_URI = {
     }
   },
 
-  parse: (uri: string): DynamicConfig => {
+  parse: (uri: string): OnlineConfig => {
     SIP008_URI.validateProtocol(uri);
 
     // URL parser for expedience, replacing the protocol "ssconf" with "https" to ensure correct
@@ -388,7 +389,7 @@ export const SIP008_URI = {
       extra[key] = value;
     }
 
-    const config: DynamicConfig = {
+    const config: OnlineConfig = {
       // Build the access URL with the parsed parameters. Exclude the query string, as the spec
       // recommends against it.
       url: `https://${uriFormattedHost}:${port.data}${urlParserResult.pathname}`,

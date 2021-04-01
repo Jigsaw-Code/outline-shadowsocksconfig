@@ -413,43 +413,43 @@ describe('shadowsocks_config', () => {
     it('can parse a valid ssconf URI with domain name and extras', () => {
       const input = encodeURI(
           'ssconf://my.domain.com/secret/long/path#certFp=AA:BB:CC:DD:EE:FF;sni=https://sni.other.com');
-      const dynamicConfig = SIP008_URI.parse(input);
-      expect(new URL(dynamicConfig.url)).toEqual(new URL('https://my.domain.com/secret/long/path'));
-      expect(dynamicConfig.extra.certFp).toEqual('AA:BB:CC:DD:EE:FF');
-      expect(dynamicConfig.extra.sni).toEqual('https://sni.other.com');
+      const onlineConfig = SIP008_URI.parse(input);
+      expect(new URL(onlineConfig.url)).toEqual(new URL('https://my.domain.com/secret/long/path'));
+      expect(onlineConfig.extra.certFp).toEqual('AA:BB:CC:DD:EE:FF');
+      expect(onlineConfig.extra.sni).toEqual('https://sni.other.com');
     });
 
     it('can parse a valid ssconf URI with domain name and custom port', () => {
       const input =
           encodeURI('ssconf://my.domain.com:9090/secret/long/path#certFp=AA:BB:CC:DD:EE:FF;');
-      const dynamicConfig = SIP008_URI.parse(input);
-      expect(new URL(dynamicConfig.url))
+      const onlineConfig = SIP008_URI.parse(input);
+      expect(new URL(onlineConfig.url))
           .toEqual(new URL('https://my.domain.com:9090/secret/long/path'));
-      expect(dynamicConfig.extra.certFp).toEqual('AA:BB:CC:DD:EE:FF');
+      expect(onlineConfig.extra.certFp).toEqual('AA:BB:CC:DD:EE:FF');
     });
 
     it('can parse a valid ssconf URI with hostname and no path', () => {
       const input = encodeURI('ssconf://my.domain.com');
-      const dynamicConfig = SIP008_URI.parse(input);
-      expect(new URL(dynamicConfig.url)).toEqual(new URL('https://my.domain.com'));
-      expect(dynamicConfig.extra.certFp).toBeUndefined();
+      const onlineConfig = SIP008_URI.parse(input);
+      expect(new URL(onlineConfig.url)).toEqual(new URL('https://my.domain.com'));
+      expect(onlineConfig.extra.certFp).toBeUndefined();
     });
 
     it('can parse a valid ssconf URI with IPv4 address', () => {
       const input =
           encodeURI('ssconf://1.2.3.4/secret/long/path#certFp=AA:BB:CC:DD:EE:FF;other=param');
-      const dynamicConfig = SIP008_URI.parse(input);
-      expect(new URL(dynamicConfig.url)).toEqual(new URL('https://1.2.3.4/secret/long/path'));
-      expect(dynamicConfig.extra.certFp).toEqual('AA:BB:CC:DD:EE:FF');
+      const onlineConfig = SIP008_URI.parse(input);
+      expect(new URL(onlineConfig.url)).toEqual(new URL('https://1.2.3.4/secret/long/path'));
+      expect(onlineConfig.extra.certFp).toEqual('AA:BB:CC:DD:EE:FF');
     });
 
     it('can parse a valid ssconf URI with IPv6 address and custom port', () => {
       const input = encodeURI(
           'ssconf://[2001:0:ce49:7601:e866:efff:62c3:fffe]:8081/secret/long/path#certFp=AA:BB:CC:DD:EE:FF');
-      const dynamicConfig = SIP008_URI.parse(input);
-      expect(new URL(dynamicConfig.url))
+      const onlineConfig = SIP008_URI.parse(input);
+      expect(new URL(onlineConfig.url))
           .toEqual(new URL('https://[2001:0:ce49:7601:e866:efff:62c3:fffe]:8081/secret/long/path'));
-      expect(dynamicConfig.extra.certFp).toEqual('AA:BB:CC:DD:EE:FF');
+      expect(onlineConfig.extra.certFp).toEqual('AA:BB:CC:DD:EE:FF');
     });
   });
 });

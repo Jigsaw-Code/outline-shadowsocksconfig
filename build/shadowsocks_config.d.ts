@@ -61,14 +61,10 @@ export declare const SIP002_URI: {
     parse: (uri: string) => Config;
     stringify: (config: Config) => string;
 };
-export interface DynamicConfig {
-    url: string;
-    extra: {
-        [key: string]: string;
-    };
+export interface OnlineConfig {
+  readonly url: string;
+  readonly extra: {[key: string]: string;};
 }
 export declare const SIP008_URI: {
-    PROTOCOL: string;
-    validateProtocol: (uri: string) => void;
-    parse: (uri: string) => DynamicConfig;
+  PROTOCOL: string; validateProtocol: (uri: string) => void; parse: (uri: string) => OnlineConfig;
 };
