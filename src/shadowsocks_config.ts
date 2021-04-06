@@ -15,6 +15,7 @@
 import * as ipaddr from 'ipaddr.js';
 import {Base64} from 'js-base64';
 import * as punycode from 'punycode';
+import {URLSearchParams} from 'url';
 
 // Custom error base class
 export class ShadowsocksConfigError extends Error {
@@ -380,13 +381,14 @@ export const SIP008_URI = {
     // Parse extra parameters from the tag, which has the format `#key0=val0;key1=val1...[;]`
     const extra = {} as {[key: string]: string};
     const tag = new Tag(decodeURIComponent(urlParserResult.hash.substring(1)));
-    for (const pair of tag.data.split(';')) {
-      const [key, value] = pair.split('=', 2);
+    // Convert tag to search parameters to leverage URLSearchParams parsing.
+    const params = new URLSearchParams(tag.data.replace(';', '&'));
+    params.forEach((value, key) => {
       if (!key) {
-        continue;
+        return;
       }
       extra[key] = value;
-    }
+    });
 
     const config: OnlineConfig = {
       // Build the access URL with the parsed parameters. Exclude the query string, as the spec

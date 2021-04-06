@@ -26,6 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var ipaddr = require("ipaddr.js");
 var js_base64_1 = require('js-base64');
 var punycode = require("punycode");
+var url_1 = require('url');
 // Custom error base class
 var ShadowsocksConfigError = /** @class */ (function (_super) {
     __extends(ShadowsocksConfigError, _super);
@@ -393,14 +394,14 @@ exports.SIP008_URI = {
         // Parse extra parameters from the tag, which has the format `#key0=val0;key1=val1...[;]`
         var extra = {};
         var tag = new Tag(decodeURIComponent(urlParserResult.hash.substring(1)));
-        for (var _i = 0, _a = tag.data.split(';'); _i < _a.length; _i++) {
-            var pair = _a[_i];
-            var _b = pair.split('=', 2), key = _b[0], value = _b[1];
-            if (!key) {
-                continue;
-            }
-            extra[key] = value;
-        }
+        // Convert tag to search parameters to leverage URLSearchParams parsing.
+        var params = new url_1.URLSearchParams(tag.data.replace(';', '&'));
+        params.forEach(function(value, key) {
+          if (!key) {
+            return;
+          }
+          extra[key] = value;
+        });
         var config = {
             // Build the access URL with the parsed parameters. Exclude the query string, as the spec
             // recommends against it.
