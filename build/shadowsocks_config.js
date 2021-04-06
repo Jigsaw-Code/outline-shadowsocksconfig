@@ -375,19 +375,18 @@ exports.SIP008_URI = {
         exports.SIP008_URI.validateProtocol(uri);
         // URL parser for expedience, replacing the protocol "ssconf" with "https" to ensure correct
         // results, otherwise browsers like Safari fail to parse it.
-        var inputForUrlParser = "https" + decodeURIComponent(uri.substring(exports.SIP008_URI.PROTOCOL.length));
+        var inputForUrlParser = uri.replace(new RegExp('^' + exports.SIP008_URI.PROTOCOL), 'https');
         // The built-in URL parser throws as desired when given URIs with invalid syntax.
         var urlParserResult = new URL(inputForUrlParser);
         // Use ValidatedConfigFields subclasses (Host, Port, Tag) to throw on validation failure.
         var uriFormattedHost = urlParserResult.hostname;
         var host;
         try {
-            host = new Host(uriFormattedHost);
-        }
-        catch (_) {
-            // Could be IPv6 host formatted with surrounding brackets, so try stripping first and last
-            // characters. If this throws, give up and let the exception propagate.
-            host = new Host(uriFormattedHost.substring(1, uriFormattedHost.length - 1));
+          host = new Host(uriFormattedHost);
+        } catch (_) {
+          // Could be IPv6 host formatted with surrounding brackets, so try stripping first and last
+          // characters. If this throws, give up and let the exception propagate.
+          host = new Host(uriFormattedHost.substring(1, uriFormattedHost.length - 1));
         }
         // The default URL parser fails to recognize the default HTTPs port (443).
         var port = new Port(urlParserResult.port || '443');

@@ -361,8 +361,7 @@ export const SIP008_URI = {
 
     // URL parser for expedience, replacing the protocol "ssconf" with "https" to ensure correct
     // results, otherwise browsers like Safari fail to parse it.
-    const inputForUrlParser =
-        `https${decodeURIComponent(uri.substring(SIP008_URI.PROTOCOL.length))}`;
+    const inputForUrlParser = uri.replace(new RegExp(`^${SIP008_URI.PROTOCOL}`), 'https');
     // The built-in URL parser throws as desired when given URIs with invalid syntax.
     const urlParserResult = new URL(inputForUrlParser);
     // Use ValidatedConfigFields subclasses (Host, Port, Tag) to throw on validation failure.

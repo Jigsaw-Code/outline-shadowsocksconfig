@@ -444,8 +444,9 @@ describe('shadowsocks_config', () => {
     });
 
     it('can parse a valid ssconf URI with IPv6 address and custom port', () => {
-      const input = encodeURI(
-          'ssconf://[2001:0:ce49:7601:e866:efff:62c3:fffe]:8081/secret/long/path#certFp=AA:BB:CC:DD:EE:FF');
+      // encodeURI encodes the IPv6 address brackets.
+      const input = `ssconf://[2001:0:ce49:7601:e866:efff:62c3:fffe]:8081/secret/long/path#certFp=${
+          encodeURIComponent('AA:BB:CC:DD:EE:FF')}`;
       const onlineConfig = SIP008_URI.parse(input);
       expect(new URL(onlineConfig.url))
           .toEqual(new URL('https://[2001:0:ce49:7601:e866:efff:62c3:fffe]:8081/secret/long/path'));
