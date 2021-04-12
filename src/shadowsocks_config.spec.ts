@@ -14,7 +14,7 @@
 
 import {Base64} from 'js-base64';
 
-import {Config, Host, InvalidConfigField, InvalidUri, LEGACY_BASE64_URI, makeConfig, Method, Password, Port, SHADOWSOCKS_URI, SIP002_URI, SIP008_URI, Tag,} from './shadowsocks_config';
+import {Config, Host, InvalidConfigField, InvalidUri, LEGACY_BASE64_URI, makeConfig, Method, parseOnlineConfigUrl, Password, Port, SHADOWSOCKS_URI, SIP002_URI, Tag,} from './shadowsocks_config';
 
 describe('shadowsocks_config', () => {
   describe('Config API', () => {
@@ -412,45 +412,45 @@ describe('shadowsocks_config', () => {
   describe('SIP008', () => {
     it('can parse a valid ssconf URI with domain name and extras', () => {
       const input = encodeURI(
-          'ssconf://my.domain.com/secret/long/path#certFp=AA:BB:CC:DD:EE:FF;sni=https://sni.other.com');
-      const onlineConfig = SIP008_URI.parse(input);
+          'ssconf://my.domain.com/secret/long/path#certFp=AA:BB:CC:DD:EE:FF&httpMethod=POST');
+      const onlineConfig = parseOnlineConfigUrl(input);
       expect(new URL(onlineConfig.url)).toEqual(new URL('https://my.domain.com/secret/long/path'));
-      expect(onlineConfig.extra.certFp).toEqual('AA:BB:CC:DD:EE:FF');
-      expect(onlineConfig.extra.sni).toEqual('https://sni.other.com');
+      expect(onlineConfig.certFingerprint).toEqual('AA:BB:CC:DD:EE:FF');
+      expect(onlineConfig.httpMethod).toEqual('POST');
     });
 
     it('can parse a valid ssconf URI with domain name and custom port', () => {
       const input =
-          encodeURI('ssconf://my.domain.com:9090/secret/long/path#certFp=AA:BB:CC:DD:EE:FF;');
-      const onlineConfig = SIP008_URI.parse(input);
+          encodeURI('ssconf://my.domain.com:9090/secret/long/path#certFp=AA:BB:CC:DD:EE:FF');
+      const onlineConfig = parseOnlineConfigUrl(input);
       expect(new URL(onlineConfig.url))
           .toEqual(new URL('https://my.domain.com:9090/secret/long/path'));
-      expect(onlineConfig.extra.certFp).toEqual('AA:BB:CC:DD:EE:FF');
+      expect(onlineConfig.certFingerprint).toEqual('AA:BB:CC:DD:EE:FF');
     });
 
     it('can parse a valid ssconf URI with hostname and no path', () => {
       const input = encodeURI('ssconf://my.domain.com');
-      const onlineConfig = SIP008_URI.parse(input);
+      const onlineConfig = parseOnlineConfigUrl(input);
       expect(new URL(onlineConfig.url)).toEqual(new URL('https://my.domain.com'));
-      expect(onlineConfig.extra.certFp).toBeUndefined();
+      expect(onlineConfig.certFingerprint).toBeUndefined();
     });
 
     it('can parse a valid ssconf URI with IPv4 address', () => {
       const input =
-          encodeURI('ssconf://1.2.3.4/secret/long/path#certFp=AA:BB:CC:DD:EE:FF;other=param');
-      const onlineConfig = SIP008_URI.parse(input);
+          encodeURI('ssconf://1.2.3.4/secret/long/path#certFp=AA:BB:CC:DD:EE:FF&other=param');
+      const onlineConfig = parseOnlineConfigUrl(input);
       expect(new URL(onlineConfig.url)).toEqual(new URL('https://1.2.3.4/secret/long/path'));
-      expect(onlineConfig.extra.certFp).toEqual('AA:BB:CC:DD:EE:FF');
+      expect(onlineConfig.certFingerprint).toEqual('AA:BB:CC:DD:EE:FF');
     });
 
     it('can parse a valid ssconf URI with IPv6 address and custom port', () => {
       // encodeURI encodes the IPv6 address brackets.
       const input = `ssconf://[2001:0:ce49:7601:e866:efff:62c3:fffe]:8081/secret/long/path#certFp=${
           encodeURIComponent('AA:BB:CC:DD:EE:FF')}`;
-      const onlineConfig = SIP008_URI.parse(input);
+      const onlineConfig = parseOnlineConfigUrl(input);
       expect(new URL(onlineConfig.url))
           .toEqual(new URL('https://[2001:0:ce49:7601:e866:efff:62c3:fffe]:8081/secret/long/path'));
-      expect(onlineConfig.extra.certFp).toEqual('AA:BB:CC:DD:EE:FF');
+      expect(onlineConfig.certFingerprint).toEqual('AA:BB:CC:DD:EE:FF');
     });
   });
 });

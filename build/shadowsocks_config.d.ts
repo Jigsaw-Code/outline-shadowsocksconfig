@@ -61,10 +61,10 @@ export declare const SIP002_URI: {
     parse: (uri: string) => Config;
     stringify: (config: Config) => string;
 };
-export interface OnlineConfig {
+export interface ConfigFetchParams {
   readonly url: string;
-  readonly extra: {[key: string]: string;};
+  readonly certFingerprint?: string;
+  readonly httpMethod?: string;
 }
-export declare const SIP008_URI: {
-  PROTOCOL: string; validateProtocol: (uri: string) => void; parse: (uri: string) => OnlineConfig;
-};
+export declare const ONLINE_CONFIG_PROTOCOL = 'ssconf';
+export declare function parseOnlineConfigUrl(url: string): ConfigFetchParams;

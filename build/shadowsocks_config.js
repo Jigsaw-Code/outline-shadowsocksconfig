@@ -364,50 +364,38 @@ exports.SIP002_URI = {
         return "ss://" + userInfo + "@" + uriHost + ":" + port.data + "/" + queryString + hash;
     },
 };
-// Ref: https://github.com/shadowsocks/shadowsocks-org/issues/89
-exports.SIP008_URI = {
-    PROTOCOL: 'ssconf',
-    validateProtocol: function (uri) {
-        if (!uri || !uri.startsWith(exports.SIP008_URI.PROTOCOL)) {
-            throw new InvalidUri("URI must start with \"" + exports.SIP008_URI.PROTOCOL + "\"");
-        }
-    },
-    parse: function (uri) {
-        exports.SIP008_URI.validateProtocol(uri);
-        // URL parser for expedience, replacing the protocol "ssconf" with "https" to ensure correct
-        // results, otherwise browsers like Safari fail to parse it.
-        var inputForUrlParser = uri.replace(new RegExp('^' + exports.SIP008_URI.PROTOCOL), 'https');
-        // The built-in URL parser throws as desired when given URIs with invalid syntax.
-        var urlParserResult = new URL(inputForUrlParser);
-        // Use ValidatedConfigFields subclasses (Host, Port, Tag) to throw on validation failure.
-        var uriFormattedHost = urlParserResult.hostname;
-        var host;
-        try {
-          host = new Host(uriFormattedHost);
-        } catch (_) {
-          // Could be IPv6 host formatted with surrounding brackets, so try stripping first and last
-          // characters. If this throws, give up and let the exception propagate.
-          host = new Host(uriFormattedHost.substring(1, uriFormattedHost.length - 1));
-        }
-        // The default URL parser fails to recognize the default HTTPs port (443).
-        var port = new Port(urlParserResult.port || '443');
-        // Parse extra parameters from the tag, which has the format `#key0=val0;key1=val1...[;]`
-        var extra = {};
-        var tag = new Tag(decodeURIComponent(urlParserResult.hash.substring(1)));
-        // Convert tag to search parameters to leverage URLSearchParams parsing.
-        var params = new url_1.URLSearchParams(tag.data.replace(';', '&'));
-        params.forEach(function(value, key) {
-          if (!key) {
-            return;
-          }
-          extra[key] = value;
-        });
-        var config = {
-            // Build the access URL with the parsed parameters. Exclude the query string, as the spec
-            // recommends against it.
-            url: "https://" + uriFormattedHost + ":" + port.data + urlParserResult.pathname,
-            extra: extra
-        };
-        return config;
-    },
-};
+exports.ONLINE_CONFIG_PROTOCOL = 'ssconf';
+// Parses access parameters to retrieve a Shadowsocks proxy config from an
+// online config URL. See: https://github.com/shadowsocks/shadowsocks-org/issues/89
+function parseOnlineConfigUrl(url) {
+  if (!url || !url.startsWith(exports.ONLINE_CONFIG_PROTOCOL)) {
+    throw new InvalidUri('URI must start with "' + exports.ONLINE_CONFIG_PROTOCOL + '"');
+  }
+  // Replace the protocol "ssconf" with "https" to ensure correct results,
+  // otherwise some Safari versions fail to parse it.
+  var inputForUrlParser = url.replace(new RegExp('^' + exports.ONLINE_CONFIG_PROTOCOL), 'https');
+  // The built-in URL parser throws as desired when given URIs with invalid syntax.
+  var urlParserResult = new URL(inputForUrlParser);
+  // Use ValidatedConfigFields subclasses (Host, Port, Tag) to throw on validation failure.
+  var uriFormattedHost = urlParserResult.hostname;
+  var host;
+  try {
+    host = new Host(uriFormattedHost);
+  } catch (_) {
+    // Could be IPv6 host formatted with surrounding brackets, so try stripping first and last
+    // characters. If this throws, give up and let the exception propagate.
+    host = new Host(uriFormattedHost.substring(1, uriFormattedHost.length - 1));
+  }
+  // The default URL parser fails to recognize the default HTTPs port (443).
+  var port = new Port(urlParserResult.port || '443');
+  // Parse extra parameters from the tag, which has the URL search parameters format.
+  var tag = new Tag(decodeURIComponent(urlParserResult.hash.substring(1)));
+  var params = new url_1.URLSearchParams(tag.data);
+  return {
+    // Build the access URL with the parsed parameters Exclude the query string and tag.
+    url: 'https://' + uriFormattedHost + ':' + port.data + urlParserResult.pathname,
+    certFingerprint: params.get('certFp') || undefined,
+    httpMethod: params.get('httpMethod') || undefined
+  };
+}
+exports.parseOnlineConfigUrl = parseOnlineConfigUrl;
