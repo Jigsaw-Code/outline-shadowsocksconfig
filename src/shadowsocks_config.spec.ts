@@ -414,7 +414,8 @@ describe('shadowsocks_config', () => {
       const input = encodeURI(
           'ssconf://my.domain.com/secret/long/path#certFp=AA:BB:CC:DD:EE:FF&httpMethod=POST');
       const onlineConfig = parseOnlineConfigUrl(input);
-      expect(new URL(onlineConfig.url)).toEqual(new URL('https://my.domain.com/secret/long/path'));
+      expect(new URL(onlineConfig.location))
+          .toEqual(new URL('https://my.domain.com/secret/long/path'));
       expect(onlineConfig.certFingerprint).toEqual('AA:BB:CC:DD:EE:FF');
       expect(onlineConfig.httpMethod).toEqual('POST');
     });
@@ -423,7 +424,7 @@ describe('shadowsocks_config', () => {
       const input =
           encodeURI('ssconf://my.domain.com:9090/secret/long/path#certFp=AA:BB:CC:DD:EE:FF');
       const onlineConfig = parseOnlineConfigUrl(input);
-      expect(new URL(onlineConfig.url))
+      expect(new URL(onlineConfig.location))
           .toEqual(new URL('https://my.domain.com:9090/secret/long/path'));
       expect(onlineConfig.certFingerprint).toEqual('AA:BB:CC:DD:EE:FF');
     });
@@ -431,7 +432,7 @@ describe('shadowsocks_config', () => {
     it('can parse a valid ssconf URI with hostname and no path', () => {
       const input = encodeURI('ssconf://my.domain.com');
       const onlineConfig = parseOnlineConfigUrl(input);
-      expect(new URL(onlineConfig.url)).toEqual(new URL('https://my.domain.com'));
+      expect(new URL(onlineConfig.location)).toEqual(new URL('https://my.domain.com'));
       expect(onlineConfig.certFingerprint).toBeUndefined();
     });
 
@@ -439,7 +440,7 @@ describe('shadowsocks_config', () => {
       const input =
           encodeURI('ssconf://1.2.3.4/secret/long/path#certFp=AA:BB:CC:DD:EE:FF&other=param');
       const onlineConfig = parseOnlineConfigUrl(input);
-      expect(new URL(onlineConfig.url)).toEqual(new URL('https://1.2.3.4/secret/long/path'));
+      expect(new URL(onlineConfig.location)).toEqual(new URL('https://1.2.3.4/secret/long/path'));
       expect(onlineConfig.certFingerprint).toEqual('AA:BB:CC:DD:EE:FF');
     });
 
@@ -448,7 +449,7 @@ describe('shadowsocks_config', () => {
       const input = `ssconf://[2001:0:ce49:7601:e866:efff:62c3:fffe]:8081/secret/long/path#certFp=${
           encodeURIComponent('AA:BB:CC:DD:EE:FF')}`;
       const onlineConfig = parseOnlineConfigUrl(input);
-      expect(new URL(onlineConfig.url))
+      expect(new URL(onlineConfig.location))
           .toEqual(new URL('https://[2001:0:ce49:7601:e866:efff:62c3:fffe]:8081/secret/long/path'));
       expect(onlineConfig.certFingerprint).toEqual('AA:BB:CC:DD:EE:FF');
     });

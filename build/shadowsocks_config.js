@@ -368,8 +368,8 @@ exports.ONLINE_CONFIG_PROTOCOL = 'ssconf';
 // Parses access parameters to retrieve a Shadowsocks proxy config from an
 // online config URL. See: https://github.com/shadowsocks/shadowsocks-org/issues/89
 function parseOnlineConfigUrl(url) {
-  if (!url || !url.startsWith(exports.ONLINE_CONFIG_PROTOCOL)) {
-    throw new InvalidUri('URI must start with "' + exports.ONLINE_CONFIG_PROTOCOL + '"');
+  if (!url || !url.startsWith(exports.ONLINE_CONFIG_PROTOCOL + ':')) {
+    throw new InvalidUri('URI protocol must be "' + exports.ONLINE_CONFIG_PROTOCOL + '"');
   }
   // Replace the protocol "ssconf" with "https" to ensure correct results,
   // otherwise some Safari versions fail to parse it.
@@ -393,7 +393,7 @@ function parseOnlineConfigUrl(url) {
   var params = new url_1.URLSearchParams(tag.data);
   return {
     // Build the access URL with the parsed parameters Exclude the query string and tag.
-    url: 'https://' + uriFormattedHost + ':' + port.data + urlParserResult.pathname,
+    location: 'https://' + uriFormattedHost + ':' + port.data + urlParserResult.pathname,
     certFingerprint: params.get('certFp') || undefined,
     httpMethod: params.get('httpMethod') || undefined
   };

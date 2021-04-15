@@ -62,7 +62,7 @@ export declare const SIP002_URI: {
     stringify: (config: Config) => string;
 };
 export interface ConfigFetchParams {
-  readonly url: string;
+  readonly location: string;
   readonly certFingerprint?: string;
   readonly httpMethod?: string;
 }
