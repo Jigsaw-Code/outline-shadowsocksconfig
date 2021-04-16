@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Base64} from 'js-base64';
-
-import {Config, Host, InvalidConfigField, InvalidUri, LEGACY_BASE64_URI, makeConfig, Method, parseOnlineConfigUrl, Password, Port, SHADOWSOCKS_URI, SIP002_URI, Tag,} from './shadowsocks_config';
+import {Host, InvalidConfigField, InvalidUri, LEGACY_BASE64_URI, makeConfig, Method, parseOnlineConfigUrl, Password, Port, SHADOWSOCKS_URI, SIP002_URI, Tag,} from './shadowsocks_config';
 
 describe('shadowsocks_config', () => {
   describe('Config API', () => {
@@ -452,6 +450,15 @@ describe('shadowsocks_config', () => {
       expect(new URL(onlineConfig.location))
           .toEqual(new URL('https://[2001:0:ce49:7601:e866:efff:62c3:fffe]:8081/secret/long/path'));
       expect(onlineConfig.certFingerprint).toEqual('AA:BB:CC:DD:EE:FF');
+    });
+
+    it('can parse a valid ssconf URI with URI-encoded tag', () => {
+      const certFp = '&=?:%';
+      const input = `ssconf://1.2.3.4/secret#certFp=${encodeURIComponent(certFp)}&httpMethod=GET`;
+      const onlineConfig = parseOnlineConfigUrl(input);
+      expect(new URL(onlineConfig.location)).toEqual(new URL('https://1.2.3.4/secret'));
+      expect(onlineConfig.certFingerprint).toEqual(certFp);
+      expect(onlineConfig.httpMethod).toEqual('GET');
     });
   });
 });
