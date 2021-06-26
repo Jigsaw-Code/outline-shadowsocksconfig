@@ -12,11 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  Host, Port, Method, Password, Tag, Config, makeConfig,
-  SHADOWSOCKS_URI, SIP002_URI, LEGACY_BASE64_URI, InvalidConfigField, InvalidUri,
-} from './shadowsocks_config';
-import {Base64} from 'js-base64';
+import {Host, InvalidConfigField, InvalidUri, LEGACY_BASE64_URI, makeConfig, Method, parseOnlineConfigUrl, Password, Port, SHADOWSOCKS_URI, SIP002_URI, Tag,} from './shadowsocks_config';
 
 describe('shadowsocks_config', () => {
   describe('Config API', () => {
@@ -62,13 +58,12 @@ describe('shadowsocks_config', () => {
     it('normalizes IPv6 address hosts', () => {
       const testCases = [
         // Canonical form
-        ['::1', '0:0:0:0:0:0:0:1'],
-        ['2001:db8::', '2001:db8:0:0:0:0:0:0'],
+        ['::1', '0:0:0:0:0:0:0:1'], ['2001:db8::', '2001:db8:0:0:0:0:0:0'],
         // Expanded form
         ['1:02:003:0004:005:06:7:08', '1:2:3:4:5:6:7:8'],
         // IPv4-mapped form
         ['::ffff:192.0.2.128', '0:0:0:0:0:ffff:c000:280']
-      ]
+      ];
       for (const [input, expanded] of testCases) {
         const host = new Host(input);
         expect(host.data).toEqual(expanded);
@@ -204,7 +199,6 @@ describe('shadowsocks_config', () => {
   });
 
   describe('URI serializer', () => {
-
     it('can serialize a SIP002 URI', () => {
       const config = makeConfig({
         host: '192.168.100.1',
@@ -213,8 +207,8 @@ describe('shadowsocks_config', () => {
         password: 'test',
         tag: 'Foo Bar',
       });
-      expect(SIP002_URI.stringify(config)).toEqual(
-        'ss://YWVzLTEyOC1nY206dGVzdA@192.168.100.1:8888/#Foo%20Bar');
+      expect(SIP002_URI.stringify(config))
+          .toEqual('ss://YWVzLTEyOC1nY206dGVzdA@192.168.100.1:8888/#Foo%20Bar');
     });
 
     it('can serialize a SIP002 URI with a non-latin password', () => {
@@ -225,8 +219,9 @@ describe('shadowsocks_config', () => {
         password: '小洞不补大洞吃苦',
         tag: 'Foo Bar',
       });
-      expect(SIP002_URI.stringify(config)).toEqual(
-        'ss://YWVzLTEyOC1nY2065bCP5rSe5LiN6KGl5aSn5rSe5ZCD6Ium@192.168.100.1:8888/#Foo%20Bar');
+      expect(SIP002_URI.stringify(config))
+          .toEqual(
+              'ss://YWVzLTEyOC1nY2065bCP5rSe5LiN6KGl5aSn5rSe5ZCD6Ium@192.168.100.1:8888/#Foo%20Bar');
     });
 
     it('can serialize a SIP002 URI with IPv6 host', () => {
@@ -237,8 +232,9 @@ describe('shadowsocks_config', () => {
         password: 'test',
         tag: 'Foo Bar',
       });
-      expect(SIP002_URI.stringify(config)).toEqual(
-        'ss://YWVzLTEyOC1nY206dGVzdA@[2001:0:ce49:7601:e866:efff:62c3:fffe]:8888/#Foo%20Bar');
+      expect(SIP002_URI.stringify(config))
+          .toEqual(
+              'ss://YWVzLTEyOC1nY206dGVzdA@[2001:0:ce49:7601:e866:efff:62c3:fffe]:8888/#Foo%20Bar');
     });
 
     it('can serialize a legacy base64 URI', () => {
@@ -261,8 +257,9 @@ describe('shadowsocks_config', () => {
         password: '小洞不补大洞吃苦',
         tag: 'Foo Bar',
       });
-      expect(LEGACY_BASE64_URI.stringify(config)).toEqual(
-        'ss://YmYtY2ZiOuWwj+a0nuS4jeihpeWkp+a0nuWQg+iLpkAxOTIuMTY4LjEwMC4xOjg4ODg#Foo%20Bar');
+      expect(LEGACY_BASE64_URI.stringify(config))
+          .toEqual(
+              'ss://YmYtY2ZiOuWwj+a0nuS4jeihpeWkp+a0nuWQg+iLpkAxOTIuMTY4LjEwMC4xOjg4ODg#Foo%20Bar');
     });
   });
 
@@ -390,7 +387,8 @@ describe('shadowsocks_config', () => {
     });
 
     it('can parse a valid legacy base64 URI with a non-latin password', () => {
-      const input = 'ss://YmYtY2ZiOuWwj+a0nuS4jeihpeWkp+a0nuWQg+iLpkAxOTIuMTY4LjEwMC4xOjg4ODg#Foo%20Bar';
+      const input =
+          'ss://YmYtY2ZiOuWwj+a0nuS4jeihpeWkp+a0nuWQg+iLpkAxOTIuMTY4LjEwMC4xOjg4ODg#Foo%20Bar';
       const config = SHADOWSOCKS_URI.parse(input);
       expect(config.method.data).toEqual('bf-cfb');
       expect(config.password.data).toEqual('小洞不补大洞吃苦');
@@ -406,6 +404,61 @@ describe('shadowsocks_config', () => {
     it('throws when parsing invalid input', () => {
       expect(() => SHADOWSOCKS_URI.parse('not a URI')).toThrowError(InvalidUri);
       expect(() => SHADOWSOCKS_URI.parse('ss://not-base64')).toThrowError(InvalidUri);
+    });
+  });
+
+  describe('SIP008', () => {
+    it('can parse a valid ssconf URI with domain name and extras', () => {
+      const input = encodeURI(
+          'ssconf://my.domain.com/secret/long/path#certFp=AA:BB:CC:DD:EE:FF&httpMethod=POST');
+      const onlineConfig = parseOnlineConfigUrl(input);
+      expect(new URL(onlineConfig.location))
+          .toEqual(new URL('https://my.domain.com/secret/long/path'));
+      expect(onlineConfig.certFingerprint).toEqual('AA:BB:CC:DD:EE:FF');
+      expect(onlineConfig.httpMethod).toEqual('POST');
+    });
+
+    it('can parse a valid ssconf URI with domain name and custom port', () => {
+      const input =
+          encodeURI('ssconf://my.domain.com:9090/secret/long/path#certFp=AA:BB:CC:DD:EE:FF');
+      const onlineConfig = parseOnlineConfigUrl(input);
+      expect(new URL(onlineConfig.location))
+          .toEqual(new URL('https://my.domain.com:9090/secret/long/path'));
+      expect(onlineConfig.certFingerprint).toEqual('AA:BB:CC:DD:EE:FF');
+    });
+
+    it('can parse a valid ssconf URI with hostname and no path', () => {
+      const input = encodeURI('ssconf://my.domain.com');
+      const onlineConfig = parseOnlineConfigUrl(input);
+      expect(new URL(onlineConfig.location)).toEqual(new URL('https://my.domain.com'));
+      expect(onlineConfig.certFingerprint).toBeUndefined();
+    });
+
+    it('can parse a valid ssconf URI with IPv4 address', () => {
+      const input =
+          encodeURI('ssconf://1.2.3.4/secret/long/path#certFp=AA:BB:CC:DD:EE:FF&other=param');
+      const onlineConfig = parseOnlineConfigUrl(input);
+      expect(new URL(onlineConfig.location)).toEqual(new URL('https://1.2.3.4/secret/long/path'));
+      expect(onlineConfig.certFingerprint).toEqual('AA:BB:CC:DD:EE:FF');
+    });
+
+    it('can parse a valid ssconf URI with IPv6 address and custom port', () => {
+      // encodeURI encodes the IPv6 address brackets.
+      const input = `ssconf://[2001:0:ce49:7601:e866:efff:62c3:fffe]:8081/secret/long/path#certFp=${
+          encodeURIComponent('AA:BB:CC:DD:EE:FF')}`;
+      const onlineConfig = parseOnlineConfigUrl(input);
+      expect(new URL(onlineConfig.location))
+          .toEqual(new URL('https://[2001:0:ce49:7601:e866:efff:62c3:fffe]:8081/secret/long/path'));
+      expect(onlineConfig.certFingerprint).toEqual('AA:BB:CC:DD:EE:FF');
+    });
+
+    it('can parse a valid ssconf URI with URI-encoded tag', () => {
+      const certFp = '&=?:%';
+      const input = `ssconf://1.2.3.4/secret#certFp=${encodeURIComponent(certFp)}&httpMethod=GET`;
+      const onlineConfig = parseOnlineConfigUrl(input);
+      expect(new URL(onlineConfig.location)).toEqual(new URL('https://1.2.3.4/secret'));
+      expect(onlineConfig.certFingerprint).toEqual(certFp);
+      expect(onlineConfig.httpMethod).toEqual('GET');
     });
   });
 });

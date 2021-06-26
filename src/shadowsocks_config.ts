@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import * as ipaddr from 'ipaddr.js';
 import {Base64} from 'js-base64';
-import * as ipaddr from 'ipaddr.js'
 import * as punycode from 'punycode';
+import {URLSearchParams} from 'url';
 
 // Custom error base class
 export class ShadowsocksConfigError extends Error {
@@ -53,13 +54,13 @@ export class Host extends ValidatedConfigField {
       host = host.data;
     }
     if (ipaddr.isValid(host)) {
-      const ip = ipaddr.parse(host)
-      this.isIPv4 = ip.kind() == "ipv4"
-      this.isIPv6 = ip.kind() == "ipv6"
+      const ip = ipaddr.parse(host);
+      this.isIPv4 = ip.kind() === 'ipv4';
+      this.isIPv6 = ip.kind() === 'ipv6';
       // Previous versions of outline-ShadowsocksConfig only accept
       // IPv6 in normalized (expanded) form, so we normalize the
       // input here to ensure that access keys remain compatible.
-      host = ip.toNormalizedString()
+      host = ip.toNormalizedString();
     } else {
       host = punycode.toASCII(host) as string;
       this.isHostname = Host.HOSTNAME_PATTERN.test(host);
@@ -274,8 +275,8 @@ export const LEGACY_BASE64_URI = {
     const data = `${method.data}:${password.data}@${host.data}:${port.data}`;
     let b64EncodedData = Base64.encode(data);
     // Remove "=" padding
-    while (b64EncodedData.slice(-1) == "=") {
-      b64EncodedData = b64EncodedData.slice(0, -1)
+    while (b64EncodedData.slice(-1) === '=') {
+      b64EncodedData = b64EncodedData.slice(0, -1);
     }
     return `ss://${b64EncodedData}${hash}`;
   },
@@ -338,3 +339,48 @@ export const SIP002_URI = {
     return `ss://${userInfo}@${uriHost}:${port.data}/${queryString}${hash}`;
   },
 };
+
+export interface ConfigFetchParams {
+  // URL endpoint to retrieve a Shadowsocks configuration.
+  readonly location: string;
+  // Server cerficate hash.
+  readonly certFingerprint?: string;
+  // HTTP method to use when accessing `url`.
+  readonly httpMethod?: string;
+}
+
+export const ONLINE_CONFIG_PROTOCOL = 'ssconf';
+
+// Parses access parameters to retrieve a Shadowsocks proxy config from an
+// online config URL. See: https://github.com/shadowsocks/shadowsocks-org/issues/89
+export function parseOnlineConfigUrl(url: string): ConfigFetchParams {
+  if (!url || !url.startsWith(`${ONLINE_CONFIG_PROTOCOL}:`)) {
+    throw new InvalidUri(`URI protocol must be "${ONLINE_CONFIG_PROTOCOL}"`);
+  }
+  // Replace the protocol "ssconf" with "https" to ensure correct results,
+  // otherwise some Safari versions fail to parse it.
+  const inputForUrlParser = url.replace(new RegExp(`^${ONLINE_CONFIG_PROTOCOL}`), 'https');
+  // The built-in URL parser throws as desired when given URIs with invalid syntax.
+  const urlParserResult = new URL(inputForUrlParser);
+  // Use ValidatedConfigFields subclasses (Host, Port, Tag) to throw on validation failure.
+  const uriFormattedHost = urlParserResult.hostname;
+  let host: Host;
+  try {
+    host = new Host(uriFormattedHost);
+  } catch (_) {
+    // Could be IPv6 host formatted with surrounding brackets, so try stripping first and last
+    // characters. If this throws, give up and let the exception propagate.
+    host = new Host(uriFormattedHost.substring(1, uriFormattedHost.length - 1));
+  }
+  // The default URL parser fails to recognize the default HTTPs port (443).
+  const port = new Port(urlParserResult.port || '443');
+  // Parse extra parameters from the tag, which has the URL search parameters format.
+  const tag = new Tag(urlParserResult.hash.substring(1));
+  const params = new URLSearchParams(tag.data);
+  return {
+    // Build the access URL with the parsed parameters Exclude the query string and tag.
+    location: `https://${uriFormattedHost}:${port.data}${urlParserResult.pathname}`,
+    certFingerprint: params.get('certFp') || undefined,
+    httpMethod: params.get('httpMethod') || undefined
+  };
+}
