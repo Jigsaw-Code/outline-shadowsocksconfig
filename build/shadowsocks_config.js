@@ -26,7 +26,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var ipaddr = require("ipaddr.js");
 var js_base64_1 = require('js-base64');
 var punycode = require("punycode");
-var url_1 = require('url');
 // Custom error base class
 var ShadowsocksConfigError = /** @class */ (function (_super) {
     __extends(ShadowsocksConfigError, _super);
@@ -390,7 +389,7 @@ function parseOnlineConfigUrl(url) {
   var port = new Port(urlParserResult.port || '443');
   // Parse extra parameters from the tag, which has the URL search parameters format.
   var tag = new Tag(urlParserResult.hash.substring(1));
-  var params = new url_1.URLSearchParams(tag.data);
+  var params = new URLSearchParams(tag.data);
   return {
     // Build the access URL with the parsed parameters Exclude the query string and tag.
     location: 'https://' + uriFormattedHost + ':' + port.data + urlParserResult.pathname,

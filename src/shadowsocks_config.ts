@@ -15,7 +15,6 @@
 import * as ipaddr from 'ipaddr.js';
 import {Base64} from 'js-base64';
 import * as punycode from 'punycode';
-import {URLSearchParams} from 'url';
 
 // Custom error base class
 export class ShadowsocksConfigError extends Error {
