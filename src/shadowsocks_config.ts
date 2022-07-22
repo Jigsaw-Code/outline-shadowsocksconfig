@@ -14,7 +14,7 @@
 
 import * as ipaddr from 'ipaddr.js';
 import {Base64} from 'js-base64';
-import * as punycode from 'punycode';
+import * as punycode from 'punycode/';
 
 // Custom error base class
 export class ShadowsocksConfigError extends Error {
@@ -207,7 +207,7 @@ export const SHADOWSOCKS_URI = {
       try {
         return uriType.parse(uri);
       } catch (e) {
-        error = e;
+        error = e as Error;
       }
     }
     if (!(error instanceof InvalidUri)) {
