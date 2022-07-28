@@ -1,4 +1,4 @@
-# ShadowsocksConfig
+# ShadowsocksConfig (Forked)
 
 [![Build Status](https://travis-ci.org/Jigsaw-Code/outline-shadowsocksconfig.svg?branch=master)](https://travis-ci.org/Jigsaw-Code/outline-shadowsocksconfig)
 
